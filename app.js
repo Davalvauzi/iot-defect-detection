@@ -1096,6 +1096,98 @@ document.addEventListener('DOMContentLoaded', () => {
     showToast(`Data Sensor HC-SR04: ${item.id} (${item.distance} cm - ${item.status})`, item.status === 'PASS' ? 'success' : 'warn');
   };
 
+  // --- DIRECT WEB SERIAL API (1-CLICK DIRECT ESP32 TO BROWSER) ---
+  let serialPort = null;
+  let serialReader = null;
+  let isSerialConnected = false;
+  const btnConnectWebSerial = document.getElementById('btn-connect-web-serial');
+  const webSerialStatusText = document.getElementById('web-serial-status-text');
+
+  async function connectWebSerial() {
+    if (!('serial' in navigator)) {
+      alert('Browser ini belum mendukung Web Serial API. Silakan gunakan Google Chrome atau Microsoft Edge terbaru di laptop.');
+      return;
+    }
+
+    try {
+      if (isSerialConnected && serialPort) {
+        if (serialReader) {
+          try { await serialReader.cancel(); } catch(e){}
+          serialReader = null;
+        }
+        try { await serialPort.close(); } catch(e){}
+        serialPort = null;
+        isSerialConnected = false;
+        if (webSerialStatusText) webSerialStatusText.textContent = '🔌 Sambungkan ESP32 USB';
+        if (btnConnectWebSerial) {
+          btnConnectWebSerial.className = 'flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold shadow-xs transition active:scale-95';
+        }
+        showToast('Koneksi USB Serial Terputus.', 'info');
+        return;
+      }
+
+      // Request COM port from user
+      serialPort = await navigator.serial.requestPort();
+      await serialPort.open({ baudRate: 115200 });
+      isSerialConnected = true;
+
+      if (webSerialStatusText) webSerialStatusText.textContent = '✓ ESP32 USB Terhubung';
+      if (btnConnectWebSerial) {
+        btnConnectWebSerial.className = 'flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold shadow-xs transition active:scale-95';
+      }
+      showToast('🎉 ESP32 Berhasil Terhubung Langsung ke Web via USB!', 'success');
+
+      const badge = document.getElementById('system-status-badge');
+      const badgeText = document.getElementById('system-status-text');
+      if (badge && badgeText) {
+        badge.className = 'flex items-center gap-2 px-3 py-1.5 rounded-xl bg-emerald-100 dark:bg-emerald-950/60 border border-emerald-300 dark:border-emerald-800 text-emerald-800 dark:text-emerald-300 text-xs font-semibold';
+        badgeText.textContent = 'Hardware ESP32 Terhubung';
+      }
+
+      const textDecoder = new TextDecoderStream();
+      serialPort.readable.pipeTo(textDecoder.writable);
+      const reader = textDecoder.readable.getReader();
+      serialReader = reader;
+
+      let lineBuffer = '';
+      while (true) {
+        const { value, done } = await reader.read();
+        if (done) break;
+        if (value) {
+          lineBuffer += value;
+          const lines = lineBuffer.split('\n');
+          lineBuffer = lines.pop();
+
+          for (const line of lines) {
+            const cleanLine = line.trim();
+            if (cleanLine.startsWith('{') && cleanLine.endsWith('}')) {
+              try {
+                const parsed = JSON.parse(cleanLine);
+                window.onESP32DataReceived(parsed);
+              } catch (err) {
+                console.warn('JSON parse error:', err);
+              }
+            }
+          }
+        }
+      }
+    } catch (e) {
+      console.error('Web Serial Error:', e);
+      if (e.name !== 'NotFoundError') {
+        showToast(`Gagal konek USB: ${e.message || e}`, 'warn');
+      }
+      isSerialConnected = false;
+      if (webSerialStatusText) webSerialStatusText.textContent = '🔌 Sambungkan ESP32 USB';
+      if (btnConnectWebSerial) {
+        btnConnectWebSerial.className = 'flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold shadow-xs transition active:scale-95';
+      }
+    }
+  }
+
+  if (btnConnectWebSerial) {
+    btnConnectWebSerial.addEventListener('click', connectWebSerial);
+  }
+
   // --- FIREBASE CLOUD REALTIME DATABASE INTEGRATION ---
   let firebaseApp = null;
   let firebaseDb = null;
