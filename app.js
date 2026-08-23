@@ -143,8 +143,10 @@ document.addEventListener('DOMContentLoaded', () => {
         state = JSON.parse(saved);
       }
     } catch (e) {
-      state = { total: 0, pass: 0, defect: 0, speedHistory: [], logs: [] };
+      state = { total: 0, pass: 0, defect: 0, speedHistory: [], logs: [], minOk: 4.0, maxOk: 7.0 };
     }
+    if (state.minOk === undefined) state.minOk = 4.0;
+    if (state.maxOk === undefined) state.maxOk = 7.0;
   }
 
   function saveState() {
@@ -154,6 +156,29 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   loadState();
+
+  // --- DYNAMIC THRESHOLD EVALUATION ---
+  function evaluateItemQuality(distance, customDefectType) {
+    const minOk = state.minOk !== undefined ? state.minOk : 4.0;
+    const maxOk = state.maxOk !== undefined ? state.maxOk : 7.0;
+    const distNum = parseFloat(distance);
+
+    let status = 'PASS';
+    let defectType = customDefectType || `Dimensi Standar (${minOk.toFixed(1)} - ${maxOk.toFixed(1)} cm)`;
+    let action = 'Lolos ke Packaging';
+
+    if (distNum < minOk) {
+      status = 'DEFECT';
+      defectType = customDefectType || `Dimensi Terlalu Tebal / Tonjolan (< ${minOk.toFixed(1)} cm)`;
+      action = 'Dorong ke Kotak Reject';
+    } else if (distNum > maxOk) {
+      status = 'DEFECT';
+      defectType = customDefectType || `Dimensi Penyok / Cekung (> ${maxOk.toFixed(1)} cm)`;
+      action = 'Dorong ke Kotak Reject';
+    }
+
+    return { status, defectType, action };
+  }
 
   // --- DOM ELEMENTS ---
   const elTotal = document.getElementById('metric-total');
@@ -172,6 +197,16 @@ document.addEventListener('DOMContentLoaded', () => {
   const btnPagePrev = document.getElementById('btn-page-prev');
   const btnPageNext = document.getElementById('btn-page-next');
   const paginationNumbers = document.getElementById('pagination-numbers');
+
+  const sliderMinOk = document.getElementById('slider-min-ok');
+  const sliderMaxOk = document.getElementById('slider-max-ok');
+  const labelMinOk = document.getElementById('label-min-ok');
+  const labelMaxOk = document.getElementById('label-max-ok');
+  const zoneMinOk = document.getElementById('zone-min-ok');
+  const zoneMaxOk = document.getElementById('zone-max-ok');
+  const presetSmall = document.getElementById('preset-small');
+  const presetMedium = document.getElementById('preset-medium');
+  const presetLarge = document.getElementById('preset-large');
 
   const elSoundBtn = document.getElementById('btn-toggle-sound');
   const elSoundIcon = document.getElementById('sound-icon');
@@ -233,6 +268,54 @@ document.addEventListener('DOMContentLoaded', () => {
       safeRenderIcons();
     });
   }
+
+  // --- THRESHOLD CALIBRATION CONTROLS ---
+  function updateThresholdUI() {
+    const minOk = state.minOk !== undefined ? state.minOk : 4.0;
+    const maxOk = state.maxOk !== undefined ? state.maxOk : 7.0;
+
+    if (sliderMinOk) sliderMinOk.value = minOk;
+    if (sliderMaxOk) sliderMaxOk.value = maxOk;
+    if (labelMinOk) labelMinOk.textContent = `${minOk.toFixed(1)} cm`;
+    if (labelMaxOk) labelMaxOk.textContent = `${maxOk.toFixed(1)} cm`;
+    if (zoneMinOk) zoneMinOk.textContent = `${minOk.toFixed(1)} cm`;
+    if (zoneMaxOk) zoneMaxOk.textContent = `${maxOk.toFixed(1)} cm`;
+  }
+
+  function setThreshold(minVal, maxVal) {
+    if (minVal >= maxVal) return;
+    state.minOk = minVal;
+    state.maxOk = maxVal;
+    saveState();
+    updateThresholdUI();
+    showToast(`Batas Mutu Diperbarui: ${minVal.toFixed(1)} cm – ${maxVal.toFixed(1)} cm (OK)`, 'info');
+  }
+
+  if (sliderMinOk) {
+    sliderMinOk.addEventListener('input', (e) => {
+      const val = parseFloat(e.target.value);
+      if (val < (state.maxOk || 7.0)) {
+        state.minOk = val;
+        saveState();
+        updateThresholdUI();
+      }
+    });
+  }
+
+  if (sliderMaxOk) {
+    sliderMaxOk.addEventListener('input', (e) => {
+      const val = parseFloat(e.target.value);
+      if (val > (state.minOk || 4.0)) {
+        state.maxOk = val;
+        saveState();
+        updateThresholdUI();
+      }
+    });
+  }
+
+  if (presetSmall) presetSmall.addEventListener('click', () => setThreshold(3.0, 5.0));
+  if (presetMedium) presetMedium.addEventListener('click', () => setThreshold(4.0, 7.0));
+  if (presetLarge) presetLarge.addEventListener('click', () => setThreshold(6.0, 10.0));
 
   // --- CHARTS INITIALIZATION ---
   let doughnutChart = null;
@@ -301,7 +384,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         const labels = recentLogs.length ? recentLogs.map(l => (l.timestamp && l.timestamp.split(' ')[1]) || l.timestamp) : ['--:--:--'];
-        const irValues = recentLogs.length ? recentLogs.map(l => l.irVal) : [0];
+        const distanceValues = recentLogs.length ? recentLogs.map(l => l.distance !== undefined ? l.distance : (l.irVal ? +(l.irVal / 25).toFixed(1) : 5.2)) : [5.2];
 
         const gradient = ctxTrend.createLinearGradient(0, 0, 0, 200);
         gradient.addColorStop(0, 'rgba(37, 99, 235, 0.2)');
@@ -312,8 +395,8 @@ document.addEventListener('DOMContentLoaded', () => {
           data: {
             labels: labels,
             datasets: [{
-              label: 'Nilai Pantulan IR (ADC)',
-              data: irValues,
+              label: 'Jarak Objek (cm)',
+              data: distanceValues,
               borderColor: '#2563eb',
               backgroundColor: gradient,
               fill: true,
@@ -322,8 +405,8 @@ document.addEventListener('DOMContentLoaded', () => {
               pointBackgroundColor: recentLogs.map(l => l.status === 'PASS' ? '#16a34a' : '#dc2626'),
               pointBorderColor: '#ffffff',
               pointBorderWidth: 1.5,
-              pointRadius: 4,
-              pointHoverRadius: 6
+              pointRadius: 4.5,
+              pointHoverRadius: 6.5
             }]
           },
           options: {
@@ -336,13 +419,22 @@ document.addEventListener('DOMContentLoaded', () => {
               },
               y: {
                 grid: { color: colors.gridColor },
-                ticks: { color: colors.textColor, font: { size: 10 } },
+                ticks: { 
+                  color: colors.textColor, 
+                  font: { size: 10 },
+                  callback: function(val) { return val + ' cm'; }
+                },
                 min: 0,
-                max: 1024
+                max: 20
               }
             },
             plugins: {
-              legend: { display: false }
+              legend: { display: false },
+              tooltip: {
+                callbacks: {
+                  label: function(ctx) { return ' Jarak: ' + ctx.parsed.y + ' cm'; }
+                }
+              }
             }
           }
         });
@@ -385,9 +477,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const limit = parseInt(filterVal, 10) || 10;
         recent = (state.logs || []).slice(-limit);
       }
-
       trendChart.data.labels = recent.length ? recent.map(l => (l.timestamp && l.timestamp.split(' ')[1]) || l.timestamp) : ['--:--:--'];
-      trendChart.data.datasets[0].data = recent.length ? recent.map(l => l.irVal) : [0];
+      trendChart.data.datasets[0].data = recent.length ? recent.map(l => l.distance !== undefined ? l.distance : (l.irVal ? +(l.irVal / 25).toFixed(1) : 5.2)) : [5.2];
       trendChart.data.datasets[0].pointBackgroundColor = recent.length ? recent.map(l => l.status === 'PASS' ? '#16a34a' : '#dc2626') : ['#2563eb'];
       trendChart.update();
     } catch (e) {}
@@ -474,6 +565,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const rowsHtml = pageLogs.map((log) => {
       const isPass = log.status === 'PASS';
+      const distDisplay = log.distance !== undefined ? log.distance : (log.irVal ? (log.irVal / 25).toFixed(1) : '5.2');
       return `
         <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/40 transition">
           <td class="py-3 px-4 font-semibold ${isPass ? 'text-slate-800 dark:text-slate-200' : 'text-red-600 dark:text-red-400'}">
@@ -482,7 +574,7 @@ document.addEventListener('DOMContentLoaded', () => {
           <td class="py-3 px-4 text-slate-500 dark:text-slate-400 text-[11px]">${log.timestamp || '--'}</td>
           <td class="py-3 px-4">
             <span class="px-2.5 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 font-mono font-semibold text-[11px]">
-              ${log.irVal !== undefined ? log.irVal : 0} ADC
+              ${distDisplay} cm
             </span>
           </td>
           <td class="py-3 px-4">
@@ -688,36 +780,42 @@ document.addEventListener('DOMContentLoaded', () => {
   if (btnSimPass) {
     btnSimPass.addEventListener('click', () => {
       initAudio();
+      const minOk = state.minOk || 4.0;
+      const maxOk = state.maxOk || 7.0;
+      const range = Math.max(0.5, maxOk - minOk - 0.4);
+      const dist = +(minOk + 0.2 + Math.random() * range).toFixed(1);
+      const evalRes = evaluateItemQuality(dist);
       const item = {
         id: generateRandomId(),
         timestamp: getFormattedTimestamp(),
-        irVal: Math.floor(120 + Math.random() * 60),
-        status: 'PASS',
-        defectType: 'Permukaan Sempurna (Normal)',
-        action: 'Lolos ke Packaging'
+        distance: dist,
+        irVal: Math.round(dist * 25),
+        status: evalRes.status,
+        defectType: evalRes.defectType,
+        action: evalRes.action
       };
       processInspectionEvent(item);
     });
   }
 
-  const defectReasons = [
-    'Goresan / Retak Permukaan',
-    'Dimensi Cacat / Berlubang',
-    'Pantulan IR Abnormal',
-    'Benda Asing (Foreign Object)'
-  ];
-
   if (btnSimDefect) {
     btnSimDefect.addEventListener('click', () => {
       initAudio();
-      const randomReason = defectReasons[Math.floor(Math.random() * defectReasons.length)];
+      const minOk = state.minOk || 4.0;
+      const maxOk = state.maxOk || 7.0;
+      const isTooThick = Math.random() > 0.5;
+      const dist = isTooThick 
+        ? +(Math.max(0.8, minOk - 0.8 - Math.random() * 1.5)).toFixed(1) 
+        : +(maxOk + 1.2 + Math.random() * 4.0).toFixed(1);
+      const evalRes = evaluateItemQuality(dist);
       const item = {
         id: generateRandomId(),
         timestamp: getFormattedTimestamp(),
-        irVal: Math.floor(750 + Math.random() * 250),
-        status: 'DEFECT',
-        defectType: randomReason,
-        action: 'Dorong ke Kotak Reject'
+        distance: dist,
+        irVal: Math.round(dist * 25),
+        status: evalRes.status,
+        defectType: evalRes.defectType,
+        action: evalRes.action
       };
       processInspectionEvent(item);
     });
@@ -815,17 +913,18 @@ document.addEventListener('DOMContentLoaded', () => {
       const idEl = document.getElementById('input-item-id');
       const statusEl = document.getElementById('input-status');
       const defectEl = document.getElementById('input-defect-type');
-      const irEl = document.getElementById('input-ir-val');
+      const distEl = document.getElementById('input-ir-val');
 
       const id = (idEl && idEl.value) ? idEl.value : generateRandomId();
       const status = (statusEl && statusEl.value) ? statusEl.value : 'PASS';
-      const defectType = (defectEl && defectEl.value) ? defectEl.value : 'Permukaan Sempurna (Normal)';
-      const irVal = irEl ? parseInt(irEl.value, 10) || 150 : 150;
+      const defectType = (defectEl && defectEl.value) ? defectEl.value : 'Dimensi Sesuai Standar (Normal)';
+      const dist = distEl ? parseFloat(distEl.value) || 5.2 : 5.2;
 
       const item = {
         id: id,
         timestamp: getFormattedTimestamp(),
-        irVal: irVal,
+        distance: dist,
+        irVal: Math.round(dist * 25),
         status: status,
         defectType: defectType,
         action: status === 'PASS' ? 'Lolos ke Packaging' : 'Dorong ke Kotak Reject'
@@ -897,16 +996,16 @@ document.addEventListener('DOMContentLoaded', () => {
       state.speedHistory = [Date.now(), Date.now() - 5000, Date.now() - 10000];
       
       state.logs = [
-        { id: 'BRG-101', timestamp: getFormattedTimestamp(18), irVal: 135, status: 'PASS', defectType: 'Permukaan Sempurna', action: 'Lolos ke Packaging' },
-        { id: 'BRG-102', timestamp: getFormattedTimestamp(16), irVal: 140, status: 'PASS', defectType: 'Permukaan Sempurna', action: 'Lolos ke Packaging' },
-        { id: 'BRG-103', timestamp: getFormattedTimestamp(14), irVal: 820, status: 'DEFECT', defectType: 'Goresan Permukaan', action: 'Dorong ke Kotak Reject' },
-        { id: 'BRG-104', timestamp: getFormattedTimestamp(12), irVal: 128, status: 'PASS', defectType: 'Permukaan Sempurna', action: 'Lolos ke Packaging' },
-        { id: 'BRG-105', timestamp: getFormattedTimestamp(10), irVal: 145, status: 'PASS', defectType: 'Permukaan Sempurna', action: 'Lolos ke Packaging' },
-        { id: 'BRG-106', timestamp: getFormattedTimestamp(8), irVal: 130, status: 'PASS', defectType: 'Permukaan Sempurna', action: 'Lolos ke Packaging' },
-        { id: 'BRG-107', timestamp: getFormattedTimestamp(6), irVal: 890, status: 'DEFECT', defectType: 'Dimensi Berlubang', action: 'Dorong ke Kotak Reject' },
-        { id: 'BRG-108', timestamp: getFormattedTimestamp(4), irVal: 138, status: 'PASS', defectType: 'Permukaan Sempurna', action: 'Lolos ke Packaging' },
-        { id: 'BRG-109', timestamp: getFormattedTimestamp(2), irVal: 142, status: 'PASS', defectType: 'Permukaan Sempurna', action: 'Lolos ke Packaging' },
-        { id: 'BRG-110', timestamp: getFormattedTimestamp(0), irVal: 125, status: 'PASS', defectType: 'Permukaan Sempurna', action: 'Lolos ke Packaging' }
+        { id: 'BRG-101', timestamp: getFormattedTimestamp(18), distance: 5.2, irVal: 130, status: 'PASS', defectType: 'Dimensi Normal (5.2 cm)', action: 'Lolos ke Packaging' },
+        { id: 'BRG-102', timestamp: getFormattedTimestamp(16), distance: 5.4, irVal: 135, status: 'PASS', defectType: 'Dimensi Normal (5.4 cm)', action: 'Lolos ke Packaging' },
+        { id: 'BRG-103', timestamp: getFormattedTimestamp(14), distance: 2.1, irVal: 52, status: 'DEFECT', defectType: 'Dimensi Terlalu Tebal / Tonjolan', action: 'Dorong ke Kotak Reject' },
+        { id: 'BRG-104', timestamp: getFormattedTimestamp(12), distance: 5.1, irVal: 128, status: 'PASS', defectType: 'Dimensi Normal (5.1 cm)', action: 'Lolos ke Packaging' },
+        { id: 'BRG-105', timestamp: getFormattedTimestamp(10), distance: 5.5, irVal: 138, status: 'PASS', defectType: 'Dimensi Normal (5.5 cm)', action: 'Lolos ke Packaging' },
+        { id: 'BRG-106', timestamp: getFormattedTimestamp(8), distance: 5.3, irVal: 132, status: 'PASS', defectType: 'Dimensi Normal (5.3 cm)', action: 'Lolos ke Packaging' },
+        { id: 'BRG-107', timestamp: getFormattedTimestamp(6), distance: 11.8, irVal: 295, status: 'DEFECT', defectType: 'Dimensi Penyok / Cekung', action: 'Dorong ke Kotak Reject' },
+        { id: 'BRG-108', timestamp: getFormattedTimestamp(4), distance: 5.2, irVal: 130, status: 'PASS', defectType: 'Dimensi Normal (5.2 cm)', action: 'Lolos ke Packaging' },
+        { id: 'BRG-109', timestamp: getFormattedTimestamp(2), distance: 5.6, irVal: 140, status: 'PASS', defectType: 'Dimensi Normal (5.6 cm)', action: 'Lolos ke Packaging' },
+        { id: 'BRG-110', timestamp: getFormattedTimestamp(0), distance: 5.0, irVal: 125, status: 'PASS', defectType: 'Dimensi Normal (5.0 cm)', action: 'Lolos ke Packaging' }
       ];
 
       currentPage = 1;
@@ -914,7 +1013,7 @@ document.addEventListener('DOMContentLoaded', () => {
       updateMetricsUI();
       playPassBeep();
       closeResetModal();
-      showToast('✨ 10 Data Demo berhasil dimuat!', 'success');
+      showToast('✨ 10 Data Demo HC-SR04 berhasil dimuat!', 'success');
     });
   }
 
@@ -940,14 +1039,15 @@ document.addEventListener('DOMContentLoaded', () => {
       }
 
       let csvContent = 'data:text/csv;charset=utf-8,';
-      csvContent += 'No,ID Barang,Waktu,Nilai Sensor IR,Hasil Status,Keterangan Cacat,Aksi Perangkat\n';
+      csvContent += 'No,ID Barang,Waktu,Jarak Sensor (cm),Hasil Status,Keterangan Cacat,Aksi Perangkat\n';
 
       state.logs.forEach((log, index) => {
+        const distVal = log.distance !== undefined ? log.distance : (log.irVal ? (log.irVal / 25).toFixed(1) : '5.2');
         const row = [
           index + 1,
           `"${log.id || ''}"`,
           `"${log.timestamp || ''}"`,
-          log.irVal !== undefined ? log.irVal : 0,
+          distVal,
           `"${log.status || ''}"`,
           `"${log.defectType || ''}"`,
           `"${log.action || ''}"`
@@ -958,7 +1058,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const encodedUri = encodeURI(csvContent);
       const link = document.createElement('a');
       link.setAttribute('href', encodedUri);
-      link.setAttribute('download', `Data_Inspeksi_QC_${new Date().toISOString().slice(0, 10)}.csv`);
+      link.setAttribute('download', `Data_Inspeksi_HCSR04_${new Date().toISOString().slice(0, 10)}.csv`);
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -976,17 +1076,24 @@ document.addEventListener('DOMContentLoaded', () => {
       badgeText.textContent = 'Hardware ESP32 Terhubung';
     }
 
+    const dist = (hardwarePayload && hardwarePayload.distance !== undefined) 
+      ? parseFloat(hardwarePayload.distance)
+      : ((hardwarePayload && hardwarePayload.irVal !== undefined) ? +(hardwarePayload.irVal / 25).toFixed(1) : 5.2);
+
+    const evalRes = evaluateItemQuality(dist, hardwarePayload.defectType);
+
     const item = {
       id: (hardwarePayload && hardwarePayload.id) || generateRandomId(),
       timestamp: getFormattedTimestamp(),
-      irVal: (hardwarePayload && hardwarePayload.irVal !== undefined) ? hardwarePayload.irVal : 120,
-      status: (hardwarePayload && hardwarePayload.status) || 'PASS',
-      defectType: (hardwarePayload && hardwarePayload.defectType) || (hardwarePayload && hardwarePayload.status === 'PASS' ? 'Normal' : 'Cacat Terdeteksi Sensor'),
-      action: (hardwarePayload && hardwarePayload.status === 'PASS') ? 'Lolos ke Packaging' : 'Dorong ke Kotak Reject'
+      distance: dist,
+      irVal: (hardwarePayload && hardwarePayload.irVal !== undefined) ? hardwarePayload.irVal : Math.round(dist * 25),
+      status: evalRes.status,
+      defectType: evalRes.defectType,
+      action: evalRes.action
     };
 
     processInspectionEvent(item);
-    showToast(`Data diterima dari ESP32: ${item.id} (${item.status})`, item.status === 'PASS' ? 'success' : 'warn');
+    showToast(`Data Sensor HC-SR04: ${item.id} (${item.distance} cm - ${item.status})`, item.status === 'PASS' ? 'success' : 'warn');
   };
 
   // --- FIREBASE CLOUD REALTIME DATABASE INTEGRATION ---
@@ -1084,5 +1191,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Initial Startup
   initCharts();
+  updateThresholdUI();
   updateMetricsUI();
 });

@@ -63,7 +63,7 @@
             <h1 class="text-base sm:text-lg font-bold tracking-tight text-slate-900 dark:text-white">Smart QC Dashboard</h1>
             <span class="text-[11px] px-2 py-0.5 rounded-full bg-blue-50 dark:bg-blue-950/60 text-blue-700 dark:text-blue-400 border border-blue-200 dark:border-blue-800 font-semibold">Tugas IoT</span>
           </div>
-          <p class="text-xs text-slate-500 dark:text-slate-400">Sistem Deteksi Cacat Barang dengan Sensor Infrared</p>
+          <p class="text-xs text-slate-500 dark:text-slate-400">Sistem Deteksi Cacat Dimensi & Ketinggian Barang (Sensor Ultrasonik HC-SR04)</p>
         </div>
       </div>
 
@@ -98,7 +98,7 @@
         <!-- Live Clock -->
         <div class="hidden sm:flex flex-col text-right pl-2 border-l border-slate-200 dark:border-slate-800">
           <span id="live-clock" class="text-xs font-mono font-bold text-slate-800 dark:text-slate-200">00:00:00</span>
-          <span id="live-date" class="text-[10px] text-slate-400 font-medium">22 Agu 2026</span>
+          <span id="live-date" class="text-[10px] text-slate-400 font-medium">23 Agu 2026</span>
         </div>
       </div>
     </div>
@@ -107,15 +107,15 @@
   <!-- MAIN CONTAINER -->
   <main class="flex-1 max-w-6xl w-full mx-auto p-4 sm:p-6 space-y-6">
 
-    <!-- SIMULASI JALUR BARANG & SENSOR IR -->
+    <!-- SIMULASI JALUR BARANG & SENSOR ULTRASONIK -->
     <section class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800/80 rounded-2xl p-5 sm:p-6 shadow-xs">
       <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-4">
         <div>
           <h2 class="text-sm sm:text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
             <i data-lucide="activity" class="w-4 h-4 text-blue-600"></i>
-            Simulasi Gerak Barang & Sensor IR
+            Simulasi Jalur Inspeksi Sensor Ultrasonik HC-SR04
           </h2>
-          <p class="text-xs text-slate-500 dark:text-slate-400">Visualisasi barang yang melintas di bawah pantulan sensor inframerah</p>
+          <p class="text-xs text-slate-500 dark:text-slate-400">Pengukuran ketinggian dan dimensi barang menggunakan pantulan gelombang sonar</p>
         </div>
 
         <div class="flex items-center gap-2">
@@ -126,17 +126,22 @@
         </div>
       </div>
 
-      <!-- Area Animasi Konveyor -->
-      <div class="w-full bg-slate-50 dark:bg-slate-950/60 border border-slate-200 dark:border-slate-800 rounded-xl p-6 flex flex-col items-center justify-center relative min-h-[170px] overflow-hidden">
+      <!-- Area Animasi Konveyor & Transduser HC-SR04 -->
+      <div class="w-full bg-slate-50 dark:bg-slate-950/60 border border-slate-200 dark:border-slate-800 rounded-xl p-6 flex flex-col items-center justify-center relative min-h-[180px] overflow-hidden">
         
-        <!-- Kepala Sensor IR -->
+        <!-- Sensor HC-SR04 Dual Transducers (Mata Dua) -->
         <div class="flex flex-col items-center z-10 mb-2">
-          <div class="px-3.5 py-1 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-xs flex items-center gap-2 text-xs font-semibold text-slate-700 dark:text-slate-200">
-            <span class="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></span>
-            <span>Sensor Infrared (TCRT5000)</span>
+          <div class="px-4 py-1.5 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-xs flex items-center gap-3 text-xs font-semibold text-slate-700 dark:text-slate-200">
+            <div class="flex items-center gap-1">
+              <span class="w-4 h-4 rounded-full border-2 border-blue-500 bg-blue-100 dark:bg-blue-950 flex items-center justify-center text-[8px] font-bold text-blue-600">T</span>
+              <span class="w-4 h-4 rounded-full border-2 border-emerald-500 bg-emerald-100 dark:bg-emerald-950 flex items-center justify-center text-[8px] font-bold text-emerald-600">R</span>
+            </div>
+            <span>Sensor Ultrasonik (HC-SR04 • Sonar 40kHz)</span>
           </div>
-          <!-- Sinar Laser IR -->
-          <div id="sensor-beam" class="w-1.5 h-12 bg-slate-300 dark:bg-slate-700 transition-all duration-200 mt-1 rounded-full opacity-60"></div>
+          <!-- Pancaran Gelombang Sonar Ultrasonik -->
+          <div id="sensor-beam" class="w-8 h-12 bg-blue-400/20 dark:bg-blue-500/10 border-x border-dashed border-blue-400/50 transition-all duration-200 mt-1 rounded-b-xl opacity-60 flex items-center justify-center">
+            <span class="text-[9px] font-mono text-blue-500 dark:text-blue-400">SONAR</span>
+          </div>
         </div>
 
         <!-- Jalur Konveyor -->
@@ -150,7 +155,7 @@
         <!-- Teks Keterangan Hasil Scan -->
         <div id="inspection-feedback" class="mt-3.5 text-xs font-medium text-slate-500 dark:text-slate-400 flex items-center gap-2">
           <span class="w-2 h-2 rounded-full bg-slate-400"></span>
-          <span>Klik tombol simulasi di bawah untuk menguji sensor</span>
+          <span>Objek standar: jarak pantulan 4.0 cm – 7.0 cm (Lolos/OK)</span>
         </div>
       </div>
     </section>
@@ -222,6 +227,62 @@
           <span class="text-xs text-slate-400 font-medium">item/mnt</span>
         </div>
         <p class="mt-1.5 text-[11px] text-slate-400">Kecepatan alur data</p>
+      </div>
+    </section>
+
+    <!-- PANEL KALIBRASI AMBANG BATAS JARAK OK / CACAT -->
+    <section class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800/80 rounded-2xl p-5 sm:p-6 shadow-xs space-y-4">
+      <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 border-b border-slate-100 dark:border-slate-800 pb-3.5">
+        <div>
+          <div class="flex items-center gap-2">
+            <h3 class="text-sm sm:text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
+              <i data-lucide="sliders-horizontal" class="w-4 h-4 text-blue-600"></i>
+              Kalibrasi Ambang Batas Kualitas (Batas Jarak OK / Cacat)
+            </h3>
+            <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800">Live Dynamic</span>
+          </div>
+          <p class="text-xs text-slate-500 dark:text-slate-400">Atur batas toleransi dimensi langsung dari web tanpa perlu re-upload kodingan ESP32</p>
+        </div>
+
+        <!-- Presets -->
+        <div class="flex items-center gap-1.5 flex-wrap">
+          <span class="text-xs text-slate-400 font-medium mr-1">Preset:</span>
+          <button id="preset-small" class="px-2.5 py-1 rounded-lg text-xs font-semibold bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 transition">Kecil (3-5cm)</button>
+          <button id="preset-medium" class="px-2.5 py-1 rounded-lg text-xs font-semibold bg-blue-50 dark:bg-blue-950/60 text-blue-700 dark:text-blue-400 border border-blue-200 dark:border-blue-800 transition">Sedang (4-7cm)</button>
+          <button id="preset-large" class="px-2.5 py-1 rounded-lg text-xs font-semibold bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 transition">Besar (6-10cm)</button>
+        </div>
+      </div>
+
+      <!-- Sliders & Inputs -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <!-- Min OK Distance -->
+        <div class="p-3.5 bg-slate-50 dark:bg-slate-950/60 rounded-xl border border-slate-200 dark:border-slate-800">
+          <div class="flex items-center justify-between text-xs mb-1.5">
+            <span class="font-semibold text-slate-700 dark:text-slate-300">Batas Min OK:</span>
+            <span id="label-min-ok" class="font-mono font-bold text-emerald-600 dark:text-emerald-400">4.0 cm</span>
+          </div>
+          <input id="slider-min-ok" type="range" min="1.0" max="10.0" step="0.5" value="4.0" class="w-full accent-emerald-600 cursor-pointer">
+          <p class="text-[10px] text-slate-400 mt-1">Jika &lt; nilai ini &rarr; <span class="text-red-500 font-semibold">Cacat Tebal</span></p>
+        </div>
+
+        <!-- Max OK Distance -->
+        <div class="p-3.5 bg-slate-50 dark:bg-slate-950/60 rounded-xl border border-slate-200 dark:border-slate-800">
+          <div class="flex items-center justify-between text-xs mb-1.5">
+            <span class="font-semibold text-slate-700 dark:text-slate-300">Batas Max OK:</span>
+            <span id="label-max-ok" class="font-mono font-bold text-emerald-600 dark:text-emerald-400">7.0 cm</span>
+          </div>
+          <input id="slider-max-ok" type="range" min="3.0" max="15.0" step="0.5" value="7.0" class="w-full accent-emerald-600 cursor-pointer">
+          <p class="text-[10px] text-slate-400 mt-1">Jika &gt; nilai ini &rarr; <span class="text-red-500 font-semibold">Cacat Penyok / Hilang</span></p>
+        </div>
+
+        <!-- Range Status Info -->
+        <div class="p-3.5 bg-emerald-50/70 dark:bg-emerald-950/30 rounded-xl border border-emerald-200 dark:border-emerald-800/60 flex flex-col justify-center">
+          <span class="text-[11px] font-bold text-emerald-800 dark:text-emerald-300 mb-0.5">Zona Dimensi Standar (PASS):</span>
+          <p class="text-xs font-mono font-bold text-emerald-700 dark:text-emerald-400">
+            <span id="zone-min-ok">4.0 cm</span> &le; Jarak &le; <span id="zone-max-ok">7.0 cm</span>
+          </p>
+          <span class="text-[10px] text-emerald-600 dark:text-emerald-400/80 mt-1">Sensor membaca jarak dalam rentang ini dianggap <b>LOLOS (OK)</b>.</span>
+        </div>
       </div>
     </section>
 
@@ -310,12 +371,12 @@
         </div>
       </div>
 
-      <!-- Line Chart (Tren Sinyal IR) -->
+      <!-- Line Chart (Tren Jarak Ultrasonik) -->
       <div class="lg:col-span-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800/80 rounded-2xl p-5 sm:p-6 shadow-xs flex flex-col">
         <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 mb-3">
           <h3 class="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2">
             <i data-lucide="trending-up" class="w-4 h-4 text-blue-600"></i>
-            Tren Pembacaan Pantulan Sensor IR (ADC)
+            Tren Pengukuran Jarak & Ketinggian Sensor HC-SR04 (cm)
           </h3>
           
           <!-- History Batch Scope -->
@@ -344,7 +405,7 @@
             <i data-lucide="list" class="w-4 h-4 text-blue-600"></i>
             Riwayat Log Data Barang
           </h3>
-          <p class="text-xs text-slate-500 dark:text-slate-400">Daftar seluruh barang yang telah diinspeksi oleh sensor infrared</p>
+          <p class="text-xs text-slate-500 dark:text-slate-400">Daftar seluruh barang yang telah diinspeksi oleh sensor ultrasonik</p>
         </div>
 
         <div class="flex items-center gap-2 w-full sm:w-auto flex-wrap">
@@ -372,7 +433,7 @@
             <tr>
               <th class="py-3 px-4">ID Barang</th>
               <th class="py-3 px-4">Waktu</th>
-              <th class="py-3 px-4">Sinyal Sensor IR</th>
+              <th class="py-3 px-4">Jarak Sensor (cm)</th>
               <th class="py-3 px-4">Hasil Status</th>
               <th class="py-3 px-4">Keterangan / Cacat</th>
               <th class="py-3 px-4">Aksi Perangkat</th>
@@ -480,17 +541,17 @@
         <div>
           <label class="block text-slate-700 dark:text-slate-300 font-semibold mb-1">Keterangan / Jenis Cacat:</label>
           <select id="input-defect-type" class="w-full px-3.5 py-2.5 rounded-lg bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-200 focus:outline-none focus:border-blue-600">
-            <option value="Permukaan Sempurna (Normal)">Permukaan Sempurna (Normal)</option>
-            <option value="Goresan / Retak Permukaan">Goresan / Retak Permukaan</option>
-            <option value="Dimensi Cacat / Berlubang">Dimensi Cacat / Berlubang</option>
-            <option value="Pantulan IR Abnormal">Pantulan IR Abnormal</option>
-            <option value="Benda Asing (Foreign Object)">Benda Asing (Foreign Object)</option>
+            <option value="Dimensi Sesuai Standar (Normal)">Dimensi Sesuai Standar (Normal)</option>
+            <option value="Dimensi Terlalu Tebal / Tonjolan">Dimensi Terlalu Tebal / Tonjolan</option>
+            <option value="Dimensi Penyok / Cekung">Dimensi Penyok / Cekung</option>
+            <option value="Posisi Barang Miring / Hilang">Posisi Barang Miring / Hilang</option>
+            <option value="Benda Asing Terdeteksi">Benda Asing Terdeteksi</option>
           </select>
         </div>
 
         <div>
-          <label class="block text-slate-700 dark:text-slate-300 font-semibold mb-1">Nilai Pantulan IR (0 - 1023 ADC):</label>
-          <input type="number" id="input-ir-val" value="140" min="0" max="1023" class="w-full px-3.5 py-2.5 rounded-lg bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-200 font-mono focus:outline-none focus:border-blue-600">
+          <label class="block text-slate-700 dark:text-slate-300 font-semibold mb-1">Nilai Jarak Sensor HC-SR04 (cm):</label>
+          <input type="number" id="input-ir-val" value="5.2" step="0.1" min="0.5" max="30.0" class="w-full px-3.5 py-2.5 rounded-lg bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-200 font-mono focus:outline-none focus:border-blue-600">
         </div>
 
         <div class="flex items-center justify-end gap-2 pt-3 border-t border-slate-100 dark:border-slate-800">
