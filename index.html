@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+<html lang="id" class="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>IoT Quality Control — Deteksi Cacat Sensor Infrared</title>
+  
+  <!-- Google Fonts: Plus Jakarta Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+            mono: ['"Space Grotesk"', 'monospace'],
+          },
+          colors: {
+            brand: {
+              50: '#eff6ff',
+              100: '#dbeafe',
+              500: '#2563eb',
+              600: '#1d4ed8',
+              700: '#1e40af'
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <!-- Firebase SDK (v8 compat for easy zero-build integration) -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="bg-[#f8fafc] text-slate-800 dark:bg-slate-950 dark:text-slate-100 min-h-screen flex flex-col font-sans selection:bg-blue-600 selection:text-white transition-colors duration-200">
+
+  <!-- TOP NAVBAR -->
+  <header class="bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 sticky top-0 z-50 px-4 sm:px-8 py-3.5 transition-colors">
+    <div class="max-w-6xl mx-auto flex flex-wrap items-center justify-between gap-4">
+      
+      <!-- Logo & Title -->
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-blue-600 dark:bg-blue-600 flex items-center justify-center text-white shadow-sm">
+          <i data-lucide="scan-line" class="w-5 h-5"></i>
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <h1 class="text-base sm:text-lg font-bold tracking-tight text-slate-900 dark:text-white">Smart QC Dashboard</h1>
+            <span class="text-[11px] px-2 py-0.5 rounded-full bg-blue-50 dark:bg-blue-950/60 text-blue-700 dark:text-blue-400 border border-blue-200 dark:border-blue-800 font-semibold">Tugas IoT</span>
+          </div>
+          <p class="text-xs text-slate-500 dark:text-slate-400">Sistem Deteksi Cacat Barang dengan Sensor Infrared</p>
+        </div>
+      </div>
+
+      <!-- Quick Controls -->
+      <div class="flex items-center gap-2.5">
+        
+        <!-- Firebase Status Button / Indicator -->
+        <button id="btn-open-firebase-modal" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-orange-50 hover:bg-orange-100 dark:bg-orange-950/40 dark:hover:bg-orange-900/60 border border-orange-200 dark:border-orange-800/60 text-orange-700 dark:text-orange-300 text-xs font-semibold transition active:scale-95">
+          <i data-lucide="flame" class="w-3.5 h-3.5 text-orange-500"></i>
+          <span id="firebase-status-text">Firebase: Standalone</span>
+        </button>
+
+        <!-- Status Hardware / Simulator -->
+        <div id="system-status-badge" class="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800/60 text-amber-800 dark:text-amber-300 text-xs font-semibold">
+          <span class="relative flex h-2 w-2">
+            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
+            <span class="relative inline-flex rounded-full h-2 w-2 bg-amber-500"></span>
+          </span>
+          <span id="system-status-text">Mode Simulasi Aktif</span>
+        </div>
+
+        <!-- Theme Toggle -->
+        <button id="btn-toggle-theme" title="Ganti Mode Terang / Gelap" class="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 transition">
+          <i id="theme-icon" data-lucide="moon" class="w-4 h-4"></i>
+        </button>
+
+        <!-- Sound Toggle -->
+        <button id="btn-toggle-sound" title="Aktifkan / Nonaktifkan Suara" class="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 transition">
+          <i id="sound-icon" data-lucide="volume-2" class="w-4 h-4"></i>
+        </button>
+
+        <!-- Live Clock -->
+        <div class="hidden sm:flex flex-col text-right pl-2 border-l border-slate-200 dark:border-slate-800">
+          <span id="live-clock" class="text-xs font-mono font-bold text-slate-800 dark:text-slate-200">00:00:00</span>
+          <span id="live-date" class="text-[10px] text-slate-400 font-medium">22 Agu 2026</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- MAIN CONTAINER -->
+  <main class="flex-1 max-w-6xl w-full mx-auto p-4 sm:p-6 space-y-6">
+
+    <!-- SIMULASI JALUR BARANG & SENSOR IR -->
+    <section class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800/80 rounded-2xl p-5 sm:p-6 shadow-xs">
+      <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-4">
+        <div>
+          <h2 class="text-sm sm:text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
+            <i data-lucide="activity" class="w-4 h-4 text-blue-600"></i>
+            Simulasi Gerak Barang & Sensor IR
+          </h2>
+          <p class="text-xs text-slate-500 dark:text-slate-400">Visualisasi barang yang melintas di bawah pantulan sensor inframerah</p>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <span class="text-xs text-slate-500 font-medium">Status Sensor:</span>
+          <span id="ir-sensor-state" class="px-3 py-1 rounded-full text-xs font-semibold bg-slate-100 text-slate-700 border border-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700">
+            Menunggu Barang...
+          </span>
+        </div>
+      </div>
+
+      <!-- Area Animasi Konveyor -->
+      <div class="w-full bg-slate-50 dark:bg-slate-950/60 border border-slate-200 dark:border-slate-800 rounded-xl p-6 flex flex-col items-center justify-center relative min-h-[170px] overflow-hidden">
+        
+        <!-- Kepala Sensor IR -->
+        <div class="flex flex-col items-center z-10 mb-2">
+          <div class="px-3.5 py-1 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-xs flex items-center gap-2 text-xs font-semibold text-slate-700 dark:text-slate-200">
+            <span class="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></span>
+            <span>Sensor Infrared (TCRT5000)</span>
+          </div>
+          <!-- Sinar Laser IR -->
+          <div id="sensor-beam" class="w-1.5 h-12 bg-slate-300 dark:bg-slate-700 transition-all duration-200 mt-1 rounded-full opacity-60"></div>
+        </div>
+
+        <!-- Jalur Konveyor -->
+        <div class="w-full max-w-xl h-9 bg-slate-200 dark:bg-slate-800/90 border-y-2 border-slate-300 dark:border-slate-700 rounded-lg relative flex items-center justify-center overflow-hidden conveyor-clean">
+          <!-- Kotak Barang Animasi -->
+          <div id="virtual-item" class="absolute left-[-70px] w-12 h-8 rounded-lg bg-blue-600 border border-blue-400 flex items-center justify-center text-white font-bold text-xs shadow-sm transition-transform">
+            <i data-lucide="package" class="w-4 h-4"></i>
+          </div>
+        </div>
+
+        <!-- Teks Keterangan Hasil Scan -->
+        <div id="inspection-feedback" class="mt-3.5 text-xs font-medium text-slate-500 dark:text-slate-400 flex items-center gap-2">
+          <span class="w-2 h-2 rounded-full bg-slate-400"></span>
+          <span>Klik tombol simulasi di bawah untuk menguji sensor</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- KARTU METRIK UTAMA -->
+    <section class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      
+      <!-- Total Barang -->
+      <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800/80 rounded-2xl p-4 sm:p-5 shadow-xs">
+        <div class="flex items-center justify-between text-slate-500 dark:text-slate-400 mb-2">
+          <span class="text-xs font-semibold">Total Diperiksa</span>
+          <div class="w-7 h-7 rounded-lg bg-blue-50 dark:bg-blue-950/50 text-blue-600 dark:text-blue-400 flex items-center justify-center">
+            <i data-lucide="boxes" class="w-4 h-4"></i>
+          </div>
+        </div>
+        <div class="flex items-baseline gap-1.5">
+          <span id="metric-total" class="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white font-mono">0</span>
+          <span class="text-xs text-slate-400 font-medium">unit</span>
+        </div>
+        <p class="mt-1.5 text-[11px] text-slate-400">Total data masuk</p>
+      </div>
+
+      <!-- Barang Lolos (Normal) -->
+      <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800/80 rounded-2xl p-4 sm:p-5 shadow-xs">
+        <div class="flex items-center justify-between text-slate-500 dark:text-slate-400 mb-2">
+          <span class="text-xs font-semibold">Barang Lolos (OK)</span>
+          <div class="w-7 h-7 rounded-lg bg-emerald-50 dark:bg-emerald-950/50 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
+            <i data-lucide="check-circle" class="w-4 h-4"></i>
+          </div>
+        </div>
+        <div class="flex items-baseline justify-between">
+          <div class="flex items-baseline gap-1.5">
+            <span id="metric-pass" class="text-2xl sm:text-3xl font-extrabold text-emerald-600 dark:text-emerald-400 font-mono">0</span>
+            <span class="text-xs text-slate-400 font-medium">unit</span>
+          </div>
+          <span id="metric-pass-pct" class="text-xs font-bold font-mono px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300">100%</span>
+        </div>
+        <p class="mt-1.5 text-[11px] text-emerald-600 dark:text-emerald-400">Kondisi barang normal</p>
+      </div>
+
+      <!-- Barang Cacat (Defect) -->
+      <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800/80 rounded-2xl p-4 sm:p-5 shadow-xs">
+        <div class="flex items-center justify-between text-slate-500 dark:text-slate-400 mb-2">
+          <span class="text-xs font-semibold">Barang Cacat</span>
+          <div class="w-7 h-7 rounded-lg bg-red-50 dark:bg-red-950/50 text-red-600 dark:text-red-400 flex items-center justify-center">
+            <i data-lucide="alert-circle" class="w-4 h-4"></i>
+          </div>
+        </div>
+        <div class="flex items-baseline justify-between">
+          <div class="flex items-baseline gap-1.5">
+            <span id="metric-defect" class="text-2xl sm:text-3xl font-extrabold text-red-600 dark:text-red-400 font-mono">0</span>
+            <span class="text-xs text-slate-400 font-medium">unit</span>
+          </div>
+          <span id="metric-defect-pct" class="text-xs font-bold font-mono px-2 py-0.5 rounded-full bg-red-100 dark:bg-red-950/60 text-red-700 dark:text-red-300">0%</span>
+        </div>
+        <p class="mt-1.5 text-[11px] text-red-600 dark:text-red-400">Perlu disortir / reject</p>
+      </div>
+
+      <!-- Kecepatan Deteksi -->
+      <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800/80 rounded-2xl p-4 sm:p-5 shadow-xs">
+        <div class="flex items-center justify-between text-slate-500 dark:text-slate-400 mb-2">
+          <span class="text-xs font-semibold">Laju Deteksi</span>
+          <div class="w-7 h-7 rounded-lg bg-sky-50 dark:bg-sky-950/50 text-sky-600 dark:text-sky-400 flex items-center justify-center">
+            <i data-lucide="gauge" class="w-4 h-4"></i>
+          </div>
+        </div>
+        <div class="flex items-baseline gap-1.5">
+          <span id="metric-speed" class="text-2xl sm:text-3xl font-extrabold text-sky-600 dark:text-sky-400 font-mono">0</span>
+          <span class="text-xs text-slate-400 font-medium">item/mnt</span>
+        </div>
+        <p class="mt-1.5 text-[11px] text-slate-400">Kecepatan alur data</p>
+      </div>
+    </section>
+
+    <!-- PANEL SIMULASI & KONTROL -->
+    <section class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800/80 rounded-2xl p-5 sm:p-6 shadow-xs space-y-4">
+      <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 border-b border-slate-100 dark:border-slate-800 pb-3.5">
+        <div>
+          <h3 class="text-sm sm:text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
+            <i data-lucide="sliders" class="w-4 h-4 text-blue-600"></i>
+            Panel Simulasi Data
+          </h3>
+          <p class="text-xs text-slate-500 dark:text-slate-400">Gunakan tombol ini untuk menguji respon sistem sebelum komponen fisik dipasang</p>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <button id="btn-export-csv" class="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-xs font-semibold text-slate-700 dark:text-slate-200 flex items-center gap-1.5 transition">
+            <i data-lucide="download" class="w-3.5 h-3.5 text-blue-600"></i>
+            Export CSV
+          </button>
+          <button id="btn-reset-data-top" class="btn-trigger-reset px-3.5 py-1.5 rounded-xl bg-red-50 hover:bg-red-100 dark:bg-red-950/40 dark:hover:bg-red-900/60 border border-red-200 dark:border-red-800/60 text-xs font-bold text-red-700 dark:text-red-300 flex items-center gap-1.5 transition">
+            <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i>
+            Reset Data
+          </button>
+        </div>
+      </div>
+
+      <!-- Tombol Aksi Simulasi -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+        <!-- Tambah Barang Lolos -->
+        <button id="btn-sim-pass" class="p-3.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-xs active:scale-[0.98] transition">
+          <i data-lucide="check" class="w-4 h-4"></i>
+          <span>+ Barang Lolos (OK)</span>
+        </button>
+
+        <!-- Tambah Barang Cacat -->
+        <button id="btn-sim-defect" class="p-3.5 rounded-xl bg-red-600 hover:bg-red-500 text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-xs active:scale-[0.98] transition">
+          <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+          <span>+ Barang Cacat</span>
+        </button>
+
+        <!-- Auto Simulasi -->
+        <button id="btn-auto-sim" class="p-3.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 font-bold text-xs sm:text-sm flex items-center justify-center gap-2 active:scale-[0.98] transition">
+          <i data-lucide="play" id="auto-sim-icon" class="w-4 h-4 text-amber-500"></i>
+          <span id="auto-sim-text">Mulai Auto Simulasi</span>
+        </button>
+
+        <!-- Input Kustom -->
+        <button id="btn-open-custom-modal" class="p-3.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 font-bold text-xs sm:text-sm flex items-center justify-center gap-2 active:scale-[0.98] transition">
+          <i data-lucide="edit-3" class="w-4 h-4 text-blue-600"></i>
+          <span>Input Data Kustom</span>
+        </button>
+      </div>
+
+      <!-- Pengaturan Auto Simulasi -->
+      <div id="auto-sim-settings" class="hidden grid-cols-1 sm:grid-cols-2 gap-4 bg-slate-50 dark:bg-slate-950/60 p-4 rounded-xl border border-slate-200 dark:border-slate-800">
+        <div>
+          <label class="text-xs font-semibold text-slate-700 dark:text-slate-300 flex justify-between mb-1">
+            <span>Kecepatan Aliran Barang:</span>
+            <span id="sim-speed-val" class="font-mono text-blue-600 dark:text-blue-400 font-bold">1.5 detik/item</span>
+          </label>
+          <input id="sim-speed-range" type="range" min="500" max="4000" step="250" value="1500" class="w-full accent-blue-600 cursor-pointer">
+        </div>
+        <div>
+          <label class="text-xs font-semibold text-slate-700 dark:text-slate-300 flex justify-between mb-1">
+            <span>Peluang Barang Cacat:</span>
+            <span id="sim-defect-val" class="font-mono text-red-600 dark:text-red-400 font-bold">25%</span>
+          </label>
+          <input id="sim-defect-range" type="range" min="5" max="80" step="5" value="25" class="w-full accent-red-600 cursor-pointer">
+        </div>
+      </div>
+    </section>
+
+    <!-- GRAFIK VISUALISASI -->
+    <section class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      
+      <!-- Doughnut Chart (Rasio Kualitas) -->
+      <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800/80 rounded-2xl p-5 sm:p-6 shadow-xs flex flex-col">
+        <div class="flex items-center justify-between mb-3">
+          <h3 class="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2">
+            <i data-lucide="pie-chart" class="w-4 h-4 text-blue-600"></i>
+            Rasio Kualitas Barang
+          </h3>
+        </div>
+        <div class="relative flex-1 min-h-[210px] flex items-center justify-center">
+          <canvas id="qualityDoughnutChart"></canvas>
+        </div>
+      </div>
+
+      <!-- Line Chart (Tren Sinyal IR) -->
+      <div class="lg:col-span-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800/80 rounded-2xl p-5 sm:p-6 shadow-xs flex flex-col">
+        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 mb-3">
+          <h3 class="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2">
+            <i data-lucide="trending-up" class="w-4 h-4 text-blue-600"></i>
+            Tren Pembacaan Pantulan Sensor IR (ADC)
+          </h3>
+          
+          <!-- History Batch Scope -->
+          <div class="flex items-center gap-2">
+            <span class="text-xs text-slate-500 hidden sm:inline">Tampilkan:</span>
+            <select id="chart-batch-filter" class="bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-semibold text-slate-700 dark:text-slate-300 rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-blue-600 cursor-pointer">
+              <option value="10" selected>10 Data Terakhir</option>
+              <option value="25">25 Data Terakhir</option>
+              <option value="50">50 Data Terakhir</option>
+              <option value="ALL">Semua Data Riwayat</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="relative flex-1 min-h-[210px]">
+          <canvas id="inspectionTrendChart"></canvas>
+        </div>
+      </div>
+    </section>
+
+    <!-- TABEL RIWAYAT LOG & PAGINATION -->
+    <section class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800/80 rounded-2xl p-5 sm:p-6 shadow-xs space-y-4">
+      <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+        <div>
+          <h3 class="text-sm sm:text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
+            <i data-lucide="list" class="w-4 h-4 text-blue-600"></i>
+            Riwayat Log Data Barang
+          </h3>
+          <p class="text-xs text-slate-500 dark:text-slate-400">Daftar seluruh barang yang telah diinspeksi oleh sensor infrared</p>
+        </div>
+
+        <div class="flex items-center gap-2 w-full sm:w-auto flex-wrap">
+          <div class="relative w-full sm:w-60">
+            <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2"></i>
+            <input id="log-search-input" type="text" placeholder="Cari ID / Keterangan..." class="w-full pl-9 pr-3 py-1.5 rounded-lg bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-xs font-medium text-slate-800 dark:text-slate-200 focus:outline-none focus:border-blue-600 transition">
+          </div>
+
+          <select id="log-filter-select" class="bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-xs font-semibold text-slate-700 dark:text-slate-300 rounded-lg px-3 py-1.5 focus:outline-none focus:border-blue-600">
+            <option value="ALL">Semua Status</option>
+            <option value="PASS">Lolos Saja</option>
+            <option value="DEFECT">Cacat Saja</option>
+          </select>
+
+          <button id="btn-clear-table-only" title="Hapus catatan riwayat tabel" class="p-2 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 transition">
+            <i data-lucide="eraser" class="w-4 h-4 text-amber-500"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Tabel -->
+      <div class="overflow-x-auto rounded-xl border border-slate-200 dark:border-slate-800">
+        <table class="w-full text-left text-xs">
+          <thead class="bg-slate-50 dark:bg-slate-950 text-slate-600 dark:text-slate-400 font-semibold uppercase tracking-wider border-b border-slate-200 dark:border-slate-800">
+            <tr>
+              <th class="py-3 px-4">ID Barang</th>
+              <th class="py-3 px-4">Waktu</th>
+              <th class="py-3 px-4">Sinyal Sensor IR</th>
+              <th class="py-3 px-4">Hasil Status</th>
+              <th class="py-3 px-4">Keterangan / Cacat</th>
+              <th class="py-3 px-4">Aksi Perangkat</th>
+            </tr>
+          </thead>
+          <tbody id="log-table-body" class="divide-y divide-slate-100 dark:divide-slate-800/60 font-sans text-slate-700 dark:text-slate-300">
+            <tr class="text-center py-6 text-slate-400">
+              <td colspan="6" class="py-8 font-sans">Belum ada data inspeksi. Gunakan tombol simulator atau sambungkan ESP32.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Pagination -->
+      <div id="table-pagination-container" class="flex flex-col sm:flex-row items-center justify-between gap-3 pt-2 text-xs text-slate-500 dark:text-slate-400">
+        <div class="flex items-center gap-3">
+          <span id="pagination-info" class="font-medium">Menampilkan 0 - 0 dari 0 data</span>
+          <div class="flex items-center gap-1.5">
+            <span>Per Hal:</span>
+            <select id="pagination-limit-select" class="bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-semibold text-slate-700 dark:text-slate-300 rounded-lg px-2 py-1 focus:outline-none focus:border-blue-600 cursor-pointer">
+              <option value="5">5</option>
+              <option value="10" selected>10</option>
+              <option value="25">25</option>
+              <option value="50">50</option>
+              <option value="ALL">Semua</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-1.5">
+          <button id="btn-page-prev" class="px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 font-semibold disabled:opacity-30 disabled:cursor-not-allowed transition flex items-center gap-1 text-xs">
+            <i data-lucide="chevron-left" class="w-3.5 h-3.5"></i>
+            <span>Prev</span>
+          </button>
+
+          <div id="pagination-numbers" class="flex items-center gap-1 font-mono"></div>
+
+          <button id="btn-page-next" class="px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 font-semibold disabled:opacity-30 disabled:cursor-not-allowed transition flex items-center gap-1 text-xs">
+            <span>Next</span>
+            <i data-lucide="chevron-right" class="w-3.5 h-3.5"></i>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- PANDUAN PINOUT HARDWARE -->
+    <section class="bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 sm:p-6 text-xs text-slate-600 dark:text-slate-400">
+      <h4 class="font-bold text-sm text-slate-800 dark:text-slate-200 mb-2 flex items-center gap-2">
+        <i data-lucide="cpu" class="w-4 h-4 text-blue-600"></i>
+        Panduan Rangkaian Hardware ESP32 & HC-SR04
+      </h4>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-3">
+        <div class="p-3.5 bg-white dark:bg-slate-950/60 rounded-xl border border-slate-200 dark:border-slate-800">
+          <span class="font-bold text-blue-600 dark:text-blue-400 block mb-1">Sensor Ultrasonik (HC-SR04):</span>
+          <p class="font-mono text-[11px] leading-relaxed">
+            VCC &rarr; VIN / 5V ESP32<br>
+            GND &rarr; GND ESP32<br>
+            Trig &rarr; <span class="font-bold text-blue-600 dark:text-blue-400">GPIO 5 (D5)</span><br>
+            Echo &rarr; <span class="font-bold text-blue-600 dark:text-blue-400">GPIO 19 (D19)</span>
+          </p>
+        </div>
+        <div class="p-3.5 bg-white dark:bg-slate-950/60 rounded-xl border border-slate-200 dark:border-slate-800">
+          <span class="font-bold text-emerald-600 dark:text-emerald-400 block mb-1">Indikator Bawaan (Onboard):</span>
+          <p class="text-[11px] leading-relaxed">
+            LED Biru Bawaan Board (<code class="font-mono text-emerald-600 dark:text-emerald-400 font-bold">GPIO 2</code>) otomatis berkedip saat mendeteksi barang cacat tanpa kabel tambahan!
+          </p>
+        </div>
+        <div class="p-3.5 bg-white dark:bg-slate-950/60 rounded-xl border border-slate-200 dark:border-slate-800">
+          <span class="font-bold text-orange-600 dark:text-orange-400 block mb-1">Koneksi & Transmisi Data:</span>
+          <p class="text-[11px] leading-relaxed">
+            Streaming via kabel USB Serial Bridge (<code class="font-mono text-blue-600 font-semibold">serial_bridge.py</code>) atau WiFi HTTP POST / Firebase Realtime DB.
+          </p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- MODAL 1: INPUT MANUAL -->
+  <div id="custom-input-modal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4">
+      <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
+        <h3 class="font-bold text-slate-900 dark:text-white text-base flex items-center gap-2">
+          <i data-lucide="plus-circle" class="w-5 h-5 text-blue-600"></i>
+          Input Data Manual
+        </h3>
+        <button id="btn-close-modal" class="text-slate-400 hover:text-slate-700 dark:hover:text-white p-1 rounded-lg">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <form id="custom-input-form" class="space-y-3.5 text-xs">
+        <div>
+          <label class="block text-slate-700 dark:text-slate-300 font-semibold mb-1">ID Barang:</label>
+          <input type="text" id="input-item-id" placeholder="Contoh: BRG-001" class="w-full px-3.5 py-2.5 rounded-lg bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-200 focus:outline-none focus:border-blue-600">
+        </div>
+
+        <div>
+          <label class="block text-slate-700 dark:text-slate-300 font-semibold mb-1">Status Kualitas:</label>
+          <select id="input-status" class="w-full px-3.5 py-2.5 rounded-lg bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-200 font-semibold focus:outline-none focus:border-blue-600">
+            <option value="PASS">LOLOS (Normal / OK)</option>
+            <option value="DEFECT">CACAT (Defect / Reject)</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block text-slate-700 dark:text-slate-300 font-semibold mb-1">Keterangan / Jenis Cacat:</label>
+          <select id="input-defect-type" class="w-full px-3.5 py-2.5 rounded-lg bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-200 focus:outline-none focus:border-blue-600">
+            <option value="Permukaan Sempurna (Normal)">Permukaan Sempurna (Normal)</option>
+            <option value="Goresan / Retak Permukaan">Goresan / Retak Permukaan</option>
+            <option value="Dimensi Cacat / Berlubang">Dimensi Cacat / Berlubang</option>
+            <option value="Pantulan IR Abnormal">Pantulan IR Abnormal</option>
+            <option value="Benda Asing (Foreign Object)">Benda Asing (Foreign Object)</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block text-slate-700 dark:text-slate-300 font-semibold mb-1">Nilai Pantulan IR (0 - 1023 ADC):</label>
+          <input type="number" id="input-ir-val" value="140" min="0" max="1023" class="w-full px-3.5 py-2.5 rounded-lg bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-200 font-mono focus:outline-none focus:border-blue-600">
+        </div>
+
+        <div class="flex items-center justify-end gap-2 pt-3 border-t border-slate-100 dark:border-slate-800">
+          <button type="button" id="btn-cancel-modal" class="px-4 py-2 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-semibold">Batal</button>
+          <button type="submit" class="px-5 py-2 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-bold">Simpan Data</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL 2: RESET DATA -->
+  <div id="reset-confirm-modal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4">
+      <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
+        <div class="flex items-center gap-2.5">
+          <div class="w-8 h-8 rounded-lg bg-red-100 dark:bg-red-950/60 text-red-600 dark:text-red-400 flex items-center justify-center">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+          </div>
+          <h3 class="font-bold text-slate-900 dark:text-white text-base">Pilihan Reset Data</h3>
+        </div>
+        <button id="btn-close-reset-modal" class="text-slate-400 hover:text-slate-700 dark:hover:text-white p-1 rounded-lg">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <div class="space-y-2.5 text-xs">
+        <button id="btn-action-reset-all" class="w-full p-3.5 rounded-xl border border-red-200 dark:border-red-900/50 bg-red-50/50 hover:bg-red-100/70 dark:bg-red-950/20 dark:hover:bg-red-950/40 text-left flex items-start gap-3 transition">
+          <div class="p-2 rounded-lg bg-red-600 text-white mt-0.5">
+            <i data-lucide="trash-2" class="w-4 h-4"></i>
+          </div>
+          <div>
+            <span class="font-bold text-red-700 dark:text-red-400 block text-xs">Reset Semua Data (Total + Log + Grafik)</span>
+            <span class="text-slate-500 dark:text-slate-400 text-[11px]">Mengosongkan semua angka hitungan dan riwayat dari awal.</span>
+          </div>
+        </button>
+
+        <button id="btn-action-clear-logs" class="w-full p-3.5 rounded-xl border border-amber-200 dark:border-amber-900/50 bg-amber-50/50 hover:bg-amber-100/70 dark:bg-amber-950/20 dark:hover:bg-amber-950/40 text-left flex items-start gap-3 transition">
+          <div class="p-2 rounded-lg bg-amber-500 text-white mt-0.5">
+            <i data-lucide="eraser" class="w-4 h-4"></i>
+          </div>
+          <div>
+            <span class="font-bold text-amber-700 dark:text-amber-400 block text-xs">Hapus Tabel Log Riwayat Saja</span>
+            <span class="text-slate-500 dark:text-slate-400 text-[11px]">Membersihkan tabel riwayat tanpa menghapus total counter barang.</span>
+          </div>
+        </button>
+
+        <button id="btn-action-load-demo" class="w-full p-3.5 rounded-xl border border-blue-200 dark:border-blue-900/50 bg-blue-50/50 hover:bg-blue-100/70 dark:bg-blue-950/20 dark:hover:bg-blue-950/40 text-left flex items-start gap-3 transition">
+          <div class="p-2 rounded-lg bg-blue-600 text-white mt-0.5">
+            <i data-lucide="sparkles" class="w-4 h-4"></i>
+          </div>
+          <div>
+            <span class="font-bold text-blue-700 dark:text-blue-400 block text-xs">Muat 10 Data Contoh / Demo</span>
+            <span class="text-slate-500 dark:text-slate-400 text-[11px]">Mengisi otomatis dashboard dengan data simulasi untuk presentasi tugas.</span>
+          </div>
+        </button>
+      </div>
+
+  <!-- MODAL 3: FIREBASE CLOUD CONFIGURATION -->
+  <div id="firebase-config-modal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4">
+      <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
+        <div class="flex items-center gap-2.5">
+          <div class="w-8 h-8 rounded-lg bg-orange-100 dark:bg-orange-950/60 text-orange-600 dark:text-orange-400 flex items-center justify-center">
+            <i data-lucide="flame" class="w-4 h-4"></i>
+          </div>
+          <div>
+            <h3 class="font-bold text-slate-900 dark:text-white text-base">Google Firebase Cloud DB</h3>
+            <p class="text-[11px] text-slate-400">Sinkronisasi Realtime Database dengan ESP32</p>
+          </div>
+        </div>
+        <button id="btn-close-firebase-modal" class="text-slate-400 hover:text-slate-700 dark:hover:text-white p-1 rounded-lg">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <div class="space-y-3 text-xs">
+        <div class="p-3 rounded-xl bg-orange-50/60 dark:bg-orange-950/20 border border-orange-200 dark:border-orange-900/40 text-orange-900 dark:text-orange-200">
+          <span class="font-bold block mb-1">Status Sinkronisasi Cloud:</span>
+          <p class="text-[11px] leading-relaxed text-slate-600 dark:text-slate-300">
+            Saat terhubung, setiap data inspeksi yang dipancarkan oleh ESP32 ke Firebase Realtime Database akan disinkronkan secara instan ke web dashboard dan aplikasi mobile!
+          </p>
+        </div>
+
+        <div>
+          <label class="block text-slate-700 dark:text-slate-300 font-semibold mb-1">Firebase Database URL:</label>
+          <input type="text" id="firebase-db-url" placeholder="https://proyek-iot-default-rtdb.firebaseio.com" class="w-full px-3 py-2 rounded-lg bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-200 font-mono text-[11px] focus:outline-none focus:border-blue-600">
+        </div>
+
+        <div>
+          <label class="block text-slate-700 dark:text-slate-300 font-semibold mb-1">API Key (Opsional):</label>
+          <input type="text" id="firebase-api-key" placeholder="AIzaSyB..." class="w-full px-3 py-2 rounded-lg bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-200 font-mono text-[11px] focus:outline-none focus:border-blue-600">
+        </div>
+
+        <div class="pt-2 flex items-center justify-between">
+          <button id="btn-firebase-demo-connect" class="px-3 py-1.5 rounded-lg bg-orange-100 hover:bg-orange-200 dark:bg-orange-950/60 dark:hover:bg-orange-900/80 text-orange-800 dark:text-orange-300 font-semibold text-xs">
+            Hubungkan Cloud Mode
+          </button>
+          <button id="btn-firebase-disconnect" class="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-semibold text-xs">
+            Mode Standalone (Lokal)
+          </button>
+        </div>
+      </div>
+
+      <div class="flex items-center justify-end pt-3 border-t border-slate-100 dark:border-slate-800">
+        <button id="btn-cancel-firebase-modal" class="px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold">Simpan & Tutup</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOAST NOTIFICATION -->
+  <div id="toast-notification" class="fixed bottom-6 right-6 z-50 flex items-center gap-2.5 px-4 py-3 rounded-xl bg-slate-900 text-white shadow-xl border border-slate-700 text-xs font-semibold transform translate-y-20 opacity-0 pointer-events-none transition-all duration-300">
+    <i id="toast-icon" data-lucide="check-circle" class="w-4 h-4 text-emerald-400"></i>
+    <span id="toast-message">Pemberitahuan</span>
+  </div>
+
+  <!-- FOOTER -->
+  <footer class="border-t border-slate-200 dark:border-slate-800 bg-white/50 dark:bg-slate-950/50 py-4 px-4 text-center text-xs text-slate-500">
+    Proyek IoT Deteksi Cacat Barang menggunakan Sensor Infrared &copy; 2026. Dashboard Monitoring Real-Time.
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>

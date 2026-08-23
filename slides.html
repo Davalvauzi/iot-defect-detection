@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Presentasi — IoT Quality Control Dashboard</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+  
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <style>
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+    }
+    .slide {
+      display: none;
+      opacity: 0;
+      transition: opacity 0.3s ease-in-out;
+    }
+    .slide.active {
+      display: flex;
+      opacity: 1;
+    }
+  </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col items-center justify-center select-none overflow-hidden">
+
+  <!-- TOP BAR / PRESENTATION PROGRESS -->
+  <div class="fixed top-0 left-0 right-0 z-50 bg-slate-900/90 backdrop-blur-md border-b border-slate-800 px-6 py-3 flex items-center justify-between text-xs">
+    <div class="flex items-center gap-2">
+      <div class="w-6 h-6 rounded-lg bg-blue-600 flex items-center justify-center text-white">
+        <i data-lucide="scan-line" class="w-3.5 h-3.5"></i>
+      </div>
+      <span class="font-bold text-white tracking-wide">Smart QC Dashboard — Presentasi Tugas IoT</span>
+    </div>
+    
+    <div class="flex items-center gap-4">
+      <span id="slide-indicator" class="font-mono text-slate-400 font-bold">Slide 1 / 10</span>
+      <div class="flex items-center gap-1">
+        <button id="btn-prev" class="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-white transition"><i data-lucide="chevron-left" class="w-4 h-4"></i></button>
+        <button id="btn-next" class="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-white transition"><i data-lucide="chevron-right" class="w-4 h-4"></i></button>
+        <button id="btn-fullscreen" class="p-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white transition ml-2"><i data-lucide="maximize" class="w-4 h-4"></i></button>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE CONTAINER (16:9 Widescreen Aspect Ratio) -->
+  <div class="w-full max-w-6xl aspect-[16/9] bg-slate-900 border border-slate-800 rounded-3xl p-8 sm:p-12 shadow-2xl relative flex flex-col justify-between overflow-hidden mt-10">
+
+    <!-- ======================================================== -->
+    <!-- SLIDE 1: COVER -->
+    <!-- ======================================================== -->
+    <div class="slide active flex-col justify-between h-full" data-slide="1">
+      <div class="space-y-4">
+        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 text-blue-400 border border-blue-500/20 text-xs font-semibold">
+          <i data-lucide="layers" class="w-3.5 h-3.5"></i>
+          <span>PROYEK PENGEMBANGAN DASHBOARD IOT</span>
+        </div>
+        <h1 class="text-3xl sm:text-5xl font-extrabold text-white tracking-tight leading-tight">
+          Smart Quality Control<br>
+          <span class="text-blue-500">Dashboard & Monitoring</span>
+        </h1>
+        <p class="text-base sm:text-lg text-slate-400 max-w-2xl">
+          Sistem Deteksi Cacat Barang Berbasis Real-Time Data Streaming, Sensor Pintar, dan Mobile Responsive Web
+        </p>
+      </div>
+
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 bg-slate-950/60 p-4 rounded-2xl border border-slate-800/80 text-xs">
+        <div>
+          <span class="text-slate-500 block">Topik Tugas</span>
+          <span class="font-bold text-white">Pengembangan Dashboard IoT</span>
+        </div>
+        <div>
+          <span class="text-slate-500 block">Cloud Database</span>
+          <span class="font-bold text-orange-400">Google Firebase Realtime</span>
+        </div>
+        <div>
+          <span class="text-slate-500 block">Flow Engine</span>
+          <span class="font-bold text-red-400">Node-RED Dashboard</span>
+        </div>
+        <div>
+          <span class="text-slate-500 block">Visualisasi</span>
+          <span class="font-bold text-blue-400">Web & Mobile Monitoring</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ======================================================== -->
+    <!-- SLIDE 2: LATAR BELAKANG -->
+    <!-- ======================================================== -->
+    <div class="slide flex-col justify-between h-full" data-slide="2">
+      <div>
+        <span class="text-xs font-bold text-blue-500 uppercase tracking-wider font-mono">01. LATAR BELAKANG</span>
+        <h2 class="text-2xl sm:text-3xl font-bold text-white mt-1">Tantangan Quality Control & Kebutuhan Otomasi</h2>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-5 my-auto">
+        <div class="p-5 rounded-2xl bg-slate-950/60 border border-slate-800 space-y-3">
+          <div class="w-10 h-10 rounded-xl bg-red-500/10 text-red-400 flex items-center justify-center">
+            <i data-lucide="alert-circle" class="w-5 h-5"></i>
+          </div>
+          <h3 class="font-bold text-base text-white">Masalah QC Manual</h3>
+          <ul class="text-xs text-slate-400 space-y-1.5 list-disc list-inside leading-relaxed">
+            <li>Kelelahan operator memicu *human-error*.</li>
+            <li>Pencatatan data manual di kertas lambat.</li>
+            <li>Sulit melacak tren kerusakan secara instan.</li>
+          </ul>
+        </div>
+
+        <div class="p-5 rounded-2xl bg-slate-950/60 border border-slate-800 space-y-3">
+          <div class="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-400 flex items-center justify-center">
+            <i data-lucide="zap" class="w-5 h-5"></i>
+          </div>
+          <h3 class="font-bold text-base text-white">Kebutuhan Solusi</h3>
+          <ul class="text-xs text-slate-400 space-y-1.5 list-disc list-inside leading-relaxed">
+            <li>Inspeksi berkecepatan tinggi tanpa sentuh.</li>
+            <li>Keputusan lolos/cacat otomatis dlm milidetik.</li>
+            <li>Akses dashboard pemantauan jarak jauh.</li>
+          </ul>
+        </div>
+
+        <div class="p-5 rounded-2xl bg-slate-950/60 border border-slate-800 space-y-3">
+          <div class="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center">
+            <i data-lucide="check-circle" class="w-5 h-5"></i>
+          </div>
+          <h3 class="font-bold text-base text-white">Solusi IoT</h3>
+          <ul class="text-xs text-slate-400 space-y-1.5 list-disc list-inside leading-relaxed">
+            <li>Node sensor cerdas berbasis ESP32.</li>
+            <li>Dashboard Web & Mobile interaktif.</li>
+            <li>Audio alarm & pencatatan log otomatis.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="text-[11px] text-slate-500">Meningkatkan akurasi kendali mutu dan efisiensi pelaporan berbasis IoT.</div>
+    </div>
+
+    <!-- ======================================================== -->
+    <!-- SLIDE 3: TUJUAN & RUANG LINGKUP -->
+    <!-- ======================================================== -->
+    <div class="slide flex-col justify-between h-full" data-slide="3">
+      <div>
+        <span class="text-xs font-bold text-blue-500 uppercase tracking-wider font-mono">02. TUJUAN PROYEK</span>
+        <h2 class="text-2xl sm:text-3xl font-bold text-white mt-1">4 Pilar Utama Sesuai Instruksi Tugas</h2>
+      </div>
+
+      <div class="grid grid-cols-2 gap-4 my-auto">
+        <div class="p-4 rounded-2xl bg-slate-950/60 border border-slate-800 flex items-start gap-3">
+          <div class="p-2.5 rounded-xl bg-blue-500/10 text-blue-400"><i data-lucide="pie-chart" class="w-5 h-5"></i></div>
+          <div>
+            <h4 class="font-bold text-sm text-white">1. Data Visualization</h4>
+            <p class="text-xs text-slate-400 mt-1">Grafik Donut (Rasio Kualitas) & Grafik Garis real-time fluktuasi sinyal sensor menggunakan Chart.js.</p>
+          </div>
+        </div>
+
+        <div class="p-4 rounded-2xl bg-slate-950/60 border border-slate-800 flex items-start gap-3">
+          <div class="p-2.5 rounded-xl bg-emerald-500/10 text-emerald-400"><i data-lucide="layout-dashboard" class="w-5 h-5"></i></div>
+          <div>
+            <h4 class="font-bold text-sm text-white">2. Web Dashboard</h4>
+            <p class="text-xs text-slate-400 mt-1">Pusat kontrol monitoring dengan kartu KPI metrik, bilik simulasi konveyor, dan ledger riwayat log.</p>
+          </div>
+        </div>
+
+        <div class="p-4 rounded-2xl bg-slate-950/60 border border-slate-800 flex items-start gap-3">
+          <div class="p-2.5 rounded-xl bg-amber-500/10 text-amber-400"><i data-lucide="smartphone" class="w-5 h-5"></i></div>
+          <div>
+            <h4 class="font-bold text-sm text-white">3. Mobile Monitoring</h4>
+            <p class="text-xs text-slate-400 mt-1">Antarmuka responsif ramah smartphone/tablet memudahkan operator memantau jalur inspeksi di mana saja.</p>
+          </div>
+        </div>
+
+        <div class="p-4 rounded-2xl bg-slate-950/60 border border-slate-800 flex items-start gap-3">
+          <div class="p-2.5 rounded-xl bg-rose-500/10 text-rose-400"><i data-lucide="activity" class="w-5 h-5"></i></div>
+          <div>
+            <h4 class="font-bold text-sm text-white">4. Real-Time Streaming</h4>
+            <p class="text-xs text-slate-400 mt-1">Streaming data instan dari mikrokontroler ESP32 via HTTP REST API JSON tanpa perlu reload halaman web.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="text-[11px] text-slate-500">Memenuhi seluruh capaian pembelajaran pengembangan dashboard IoT modern.</div>
+    </div>
+
+    <!-- ======================================================== -->
+    <!-- SLIDE 4: ARSITEKTUR SISTEM -->
+    <!-- ======================================================== -->
+    <div class="slide flex-col justify-between h-full" data-slide="4">
+      <div>
+        <span class="text-xs font-bold text-blue-500 uppercase tracking-wider font-mono">03. ARSITEKTUR SISTEM</span>
+        <h2 class="text-2xl sm:text-3xl font-bold text-white mt-1">Alur Data 3-Tier Layer IoT</h2>
+      </div>
+
+      <div class="grid grid-cols-3 gap-4 my-auto">
+        <div class="p-5 rounded-2xl bg-blue-950/30 border border-blue-500/30 space-y-2">
+          <span class="text-[10px] font-mono font-bold uppercase px-2 py-0.5 rounded-md bg-blue-500/20 text-blue-400">Layer 1</span>
+          <h3 class="font-bold text-base text-white">Perception Layer</h3>
+          <p class="text-xs text-slate-300">
+            • Sensor Ultrasonik / Infrared<br>
+            • Mikrokontroler ESP32 240MHz<br>
+            • Logika Klasifikasi Pass/Defect
+          </p>
+        </div>
+
+        <div class="p-5 rounded-2xl bg-amber-950/30 border border-amber-500/30 space-y-2">
+          <span class="text-[10px] font-mono font-bold uppercase px-2 py-0.5 rounded-md bg-amber-500/20 text-amber-400">Layer 2</span>
+          <h3 class="font-bold text-base text-white">Network Layer</h3>
+          <p class="text-xs text-slate-300">
+            • Jaringan WiFi 802.11 b/g/n<br>
+            • Protokol REST API (HTTP POST)<br>
+            • Payload JSON Ringan & Cepat
+          </p>
+        </div>
+
+        <div class="p-5 rounded-2xl bg-emerald-950/30 border border-emerald-500/30 space-y-2">
+          <span class="text-[10px] font-mono font-bold uppercase px-2 py-0.5 rounded-md bg-emerald-500/20 text-emerald-400">Layer 3</span>
+          <h3 class="font-bold text-base text-white">Application Layer</h3>
+          <p class="text-xs text-slate-300">
+            • Web Dashboard & Mobile View<br>
+            • Visualisasi Real-Time Chart.js<br>
+            • Simulator, Audio & Export CSV
+          </p>
+        </div>
+      </div>
+
+      <div class="text-[11px] text-slate-500">Struktur modular mempermudah integrasi hardware dan software secara mandiri.</div>
+    </div>
+
+    <!-- ======================================================== -->
+    <!-- SLIDE 5: HARDWARE & PINOUT -->
+    <!-- ======================================================== -->
+    <div class="slide flex-col justify-between h-full" data-slide="5">
+      <div>
+        <span class="text-xs font-bold text-blue-500 uppercase tracking-wider font-mono">04. IMPLEMENTASI HARDWARE</span>
+        <h2 class="text-2xl sm:text-3xl font-bold text-white mt-1">Konfigurasi Rangkaian & Pinout ESP32</h2>
+      </div>
+
+      <div class="grid grid-cols-2 gap-5 my-auto">
+        <div class="p-5 rounded-2xl bg-slate-950/60 border border-slate-800 space-y-2">
+          <h4 class="font-bold text-sm text-blue-400">Opsi 1: Direct 4-Wire (Praktis)</h4>
+          <p class="text-xs text-slate-300 leading-relaxed">
+            Hanya butuh 4 kabel jumper Female-to-Female dari ESP32 langsung ke Sensor (Ultrasonik HC-SR04):<br><br>
+            <code class="font-mono text-emerald-400">VCC  ➔  Pin VIN (5V) ESP32</code><br>
+            <code class="font-mono text-emerald-400">GND  ➔  Pin GND ESP32</code><br>
+            <code class="font-mono text-emerald-400">Trig ➔  GPIO 5 (D5) ESP32</code><br>
+            <code class="font-mono text-emerald-400">Echo ➔  GPIO 19 (D19) ESP32</code>
+          </p>
+        </div>
+
+        <div class="p-5 rounded-2xl bg-slate-950/60 border border-slate-800 space-y-2">
+          <h4 class="font-bold text-sm text-emerald-400">Opsi 2: Full Breadboard (Opsional)</h4>
+          <p class="text-xs text-slate-300 leading-relaxed">
+            Menambahkan aktuator & indikator fisik tambahan:<br><br>
+            <code class="font-mono text-slate-300">• LED Merah (Cacat)  ➔ GPIO 19</code><br>
+            <code class="font-mono text-slate-300">• LED Hijau (Lolos)  ➔ GPIO 21</code><br>
+            <code class="font-mono text-slate-300">• Buzzer Alarm       ➔ GPIO 18</code><br>
+            <code class="font-mono text-slate-300">• Servo Sortir       ➔ GPIO 13</code>
+          </p>
+        </div>
+      </div>
+
+      <div class="text-[11px] text-slate-500">Fleksibel: Bisa berjalan dengan direct wiring minimalis ataupun rangkaian breadboard lengkap.</div>
+    </div>
+
+    <!-- ======================================================== -->
+    <!-- SLIDE 6: FITUR WEB DASHBOARD -->
+    <!-- ======================================================== -->
+    <div class="slide flex-col justify-between h-full" data-slide="6">
+      <div>
+        <span class="text-xs font-bold text-blue-500 uppercase tracking-wider font-mono">05. TAMPILAN DASHBOARD</span>
+        <h2 class="text-2xl sm:text-3xl font-bold text-white mt-1">Antarmuka Modern & Visualisasi Interaktif</h2>
+      </div>
+
+      <div class="grid grid-cols-2 gap-4 my-auto text-xs">
+        <div class="p-4 rounded-2xl bg-slate-950/60 border border-slate-800 space-y-1">
+          <span class="font-bold text-white flex items-center gap-1.5"><i data-lucide="sliders" class="w-4 h-4 text-blue-400"></i> Bilik Simulasi Konveyor</span>
+          <p class="text-slate-400">Animasi pergerakan barang melintas di bawah sensor dengan indikator sinar laser (Hijau / Merah).</p>
+        </div>
+
+        <div class="p-4 rounded-2xl bg-slate-950/60 border border-slate-800 space-y-1">
+          <span class="font-bold text-white flex items-center gap-1.5"><i data-lucide="activity" class="w-4 h-4 text-emerald-400"></i> 4 Kartu KPI Metrik</span>
+          <p class="text-slate-400">Total Throughput, Barang Lolos (OK %), Barang Cacat (Defect %), dan Laju Kecepatan Alur (item/menit).</p>
+        </div>
+
+        <div class="p-4 rounded-2xl bg-slate-950/60 border border-slate-800 space-y-1">
+          <span class="font-bold text-white flex items-center gap-1.5"><i data-lucide="trending-up" class="w-4 h-4 text-amber-400"></i> Grafik & Filter Scope Riwayat</span>
+          <p class="text-slate-400">Chart.js Fluktuasi Sinyal dengan filter jangkauan: 10 Data, 25 Data, 50 Data, atau Seluruh Riwayat.</p>
+        </div>
+
+        <div class="p-4 rounded-2xl bg-slate-950/60 border border-slate-800 space-y-1">
+          <span class="font-bold text-white flex items-center gap-1.5"><i data-lucide="list" class="w-4 h-4 text-blue-400"></i> Tabel Log & Pagination</span>
+          <p class="text-slate-400">Tabel riwayat dengan pencarian cepat, filter status, dan navigasi halaman (5, 10, 25, 50, Semua baris).</p>
+        </div>
+      </div>
+
+      <div class="text-[11px] text-slate-500">Palet warna Classic Blue & Emerald yang bersih, nyaman, dan tidak kaku.</div>
+    </div>
+
+    <!-- ======================================================== -->
+    <!-- SLIDE 7: SIMULATOR & PENGELOLAAN DATA -->
+    <!-- ======================================================== -->
+    <div class="slide flex-col justify-between h-full" data-slide="7">
+      <div>
+        <span class="text-xs font-bold text-blue-500 uppercase tracking-wider font-mono">06. SIMULATOR & DATA ENGINE</span>
+        <h2 class="text-2xl sm:text-3xl font-bold text-white mt-1">Fitur Pengujian Mandiri Tanpa Hardware</h2>
+      </div>
+
+      <div class="grid grid-cols-3 gap-4 my-auto text-xs">
+        <div class="p-4 rounded-2xl bg-slate-950/60 border border-slate-800 space-y-2">
+          <span class="font-bold text-blue-400 text-sm block">🎮 Tombol Simulasi Cepat</span>
+          <p class="text-slate-300 leading-relaxed">
+            • + Tambah Barang Lolos<br>
+            • + Tambah Barang Cacat (acak jenis kerusakan)<br>
+            • Mode Auto Simulasi Aliran Barang<br>
+            • Injeksi Nilai Kustom Manual
+          </p>
+        </div>
+
+        <div class="p-4 rounded-2xl bg-slate-950/60 border border-slate-800 space-y-2">
+          <span class="font-bold text-emerald-400 text-sm block">🔊 Audio Haptik & UI</span>
+          <p class="text-slate-300 leading-relaxed">
+            • Web Audio API Synthesizer (beep nada tinggi & alarm defect)<br>
+            • Mode Terang / Gelap (Theme Switcher)<br>
+            • Toast Notification Data Masuk
+          </p>
+        </div>
+
+        <div class="p-4 rounded-2xl bg-slate-950/60 border border-slate-800 space-y-2">
+          <span class="font-bold text-amber-400 text-sm block">📁 Reset & Export CSV</span>
+          <p class="text-slate-300 leading-relaxed">
+            • Unduh Laporan Inspeksi ke file CSV/Excel<br>
+            • Modal Reset Fleksibel (Reset Semua / Bersihkan Log Saja / Muat 10 Demo)
+          </p>
+        </div>
+      </div>
+
+      <div class="text-[11px] text-slate-500">Memungkinkan demonstrasi simulasi secara penuh kapan pun saat presentasi.</div>
+    </div>
+
+    <!-- ======================================================== -->
+    <!-- SLIDE 8: PENGUJIAN & ANALISIS -->
+    <!-- ======================================================== -->
+    <div class="slide flex-col justify-between h-full" data-slide="8">
+      <div>
+        <span class="text-xs font-bold text-blue-500 uppercase tracking-wider font-mono">07. HASIL PENGUJIAN</span>
+        <h2 class="text-2xl sm:text-3xl font-bold text-white mt-1">Validasi Respon Sistem & Analisis Kinerja</h2>
+      </div>
+
+      <div class="grid grid-cols-2 gap-4 my-auto text-xs">
+        <div class="p-4 rounded-2xl bg-emerald-950/30 border border-emerald-500/30 space-y-1">
+          <span class="font-bold text-emerald-400 text-sm">✓ Pengujian Barang Normal (Pass)</span>
+          <p class="text-slate-300">Sensor membaca nilai dalam toleransi normal. Sistem mencatat status LOLOS, counter bertambah, nada beep pendek berbunyi.</p>
+        </div>
+
+        <div class="p-4 rounded-2xl bg-rose-950/30 border border-rose-500/30 space-y-1">
+          <span class="font-bold text-rose-400 text-sm">⚠ Pengujian Barang Cacat (Defect)</span>
+          <p class="text-slate-300">Sensor membaca deviasi nilai di luar ambang batas. Sistem langsung mencatat CACAT, alarm 2-nada berbunyi, servo rejector aktif.</p>
+        </div>
+
+        <div class="p-4 rounded-2xl bg-blue-950/30 border border-blue-500/30 space-y-1">
+          <span class="font-bold text-blue-400 text-sm">⚡ Latensi & Kecepatan Respons</span>
+          <p class="text-slate-300">Waktu transmisi dari deteksi sensor hingga pembaruan grafik di web &lt; 40 ms tanpa lag.</p>
+        </div>
+
+        <div class="p-4 rounded-2xl bg-amber-950/30 border border-amber-500/30 space-y-1">
+          <span class="font-bold text-amber-400 text-sm">💾 Ketahanan Penyimpanan Data</span>
+          <p class="text-slate-300">Data tetap aman tersimpan saat browser direfresh atau ditutup melalui mekanisme LocalStorage.</p>
+        </div>
+      </div>
+
+      <div class="text-[11px] text-slate-500">Hasil pengujian membuktikan sistem bekerja stabil dan responsif.</div>
+    </div>
+
+    <!-- ======================================================== -->
+    <!-- SLIDE 9: KESIMPULAN & PENGEMBANGAN -->
+    <!-- ======================================================== -->
+    <div class="slide flex-col justify-between h-full" data-slide="9">
+      <div>
+        <span class="text-xs font-bold text-blue-500 uppercase tracking-wider font-mono">08. KESIMPULAN & MASA DEPAN</span>
+        <h2 class="text-2xl sm:text-3xl font-bold text-white mt-1">Rangkuman Proyek & Potensi Integrasi</h2>
+      </div>
+
+      <div class="grid grid-cols-2 gap-5 my-auto text-xs">
+        <div class="p-5 rounded-2xl bg-slate-950/60 border border-slate-800 space-y-3">
+          <h4 class="font-bold text-emerald-400 text-sm">Kesimpulan Proyek</h4>
+          <ul class="text-slate-300 space-y-1.5 list-disc list-inside leading-relaxed">
+            <li>Seluruh kriteria tugas terpenuhi: visualisasi data, web & mobile monitoring, dan streaming real-time.</li>
+            <li>Mampu mendeteksi dan mengklasifikasikan kondisi barang secara otomatis.</li>
+            <li>Simulator terintegrasi memudahkan pengujian dan demonstrasi tugas.</li>
+          </ul>
+        </div>
+
+        <div class="p-5 rounded-2xl bg-slate-950/60 border border-slate-800 space-y-3">
+          <h4 class="font-bold text-blue-400 text-sm">Pengembangan Lanjutan</h4>
+          <ul class="text-slate-300 space-y-1.5 list-disc list-inside leading-relaxed">
+            <li>Integrasi Cloud Database (Firebase / ThingsBoard) untuk penyimpanan skala besar.</li>
+            <li>Penerapan protokol MQTT untuk komunikasi IoT berlatensi sangat rendah.</li>
+            <li>Penggunaan kamera ESP32-CAM (Computer Vision) untuk deteksi cacat visual kompleks.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="text-[11px] text-slate-500">Sistem siap diperluas untuk implementasi skala industri yang lebih besar.</div>
+    </div>
+
+    <!-- ======================================================== -->
+    <!-- SLIDE 10: PENUTUP / Q&A -->
+    <!-- ======================================================== -->
+    <div class="slide flex-col justify-center items-center text-center h-full space-y-5" data-slide="10">
+      <div class="w-16 h-16 rounded-3xl bg-blue-600/20 text-blue-400 flex items-center justify-center border border-blue-500/30 shadow-lg">
+        <i data-lucide="check-check" class="w-8 h-8"></i>
+      </div>
+      <div>
+        <h2 class="text-4xl font-extrabold text-white">Terima Kasih!</h2>
+        <p class="text-emerald-400 font-bold text-lg mt-1">Sesi Tanya Jawab & Demonstrasi Langsung</p>
+      </div>
+      <p class="text-slate-400 text-xs max-w-md">
+        Smart Quality Control Dashboard &bull; IoT Real-Time Monitoring System
+      </p>
+    </div>
+
+  </div>
+
+  <!-- BOTTOM HELPER KEYS -->
+  <div class="fixed bottom-3 text-[11px] text-slate-500 font-mono flex items-center gap-4">
+    <span>Gunakan tombol <kbd class="px-1.5 py-0.5 rounded bg-slate-800 text-slate-300 border border-slate-700">←</kbd> <kbd class="px-1.5 py-0.5 rounded bg-slate-800 text-slate-300 border border-slate-700">→</kbd> atau <kbd class="px-1.5 py-0.5 rounded bg-slate-800 text-slate-300 border border-slate-700">Spasi</kbd> untuk ganti slide</span>
+  </div>
+
+  <!-- SCRIPT SLIDE NAVIGATION -->
+  <script>
+    lucide.createIcons();
+
+    let currentSlide = 1;
+    const totalSlides = 10;
+    const slides = document.querySelectorAll('.slide');
+    const indicator = document.getElementById('slide-indicator');
+
+    function showSlide(index) {
+      if (index < 1) index = 1;
+      if (index > totalSlides) index = totalSlides;
+      currentSlide = index;
+
+      slides.forEach((slide) => {
+        slide.classList.remove('active');
+        if (parseInt(slide.getAttribute('data-slide'), 10) === currentSlide) {
+          slide.classList.add('active');
+        }
+      });
+
+      if (indicator) {
+        indicator.textContent = `Slide ${currentSlide} / ${totalSlides}`;
+      }
+    }
+
+    document.getElementById('btn-prev').addEventListener('click', () => showSlide(currentSlide - 1));
+    document.getElementById('btn-next').addEventListener('click', () => showSlide(currentSlide + 1));
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') {
+        showSlide(currentSlide + 1);
+      } else if (e.key === 'ArrowLeft' || e.key === 'PageUp') {
+        showSlide(currentSlide - 1);
+      }
+    });
+
+    document.getElementById('btn-fullscreen').addEventListener('click', () => {
+      if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen().catch(() => {});
+      } else {
+        document.exitFullscreen().catch(() => {});
+      }
+    });
+  </script>
+</body>
+</html>

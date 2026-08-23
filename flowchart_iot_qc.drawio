@@ -1,0 +1,204 @@
+<mxfile host="app.diagrams.net" modified="2026-08-23T13:50:00.000Z" agent="Antigravity IoT Studio" version="21.0.0" type="device">
+  <diagram id="iot-qc-flowchart" name="Flowchart Sistem IoT Quality Control">
+    <mxGraphModel dx="1422" dy="1200" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1200" pageHeight="1600" background="#F8FAFC" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <!-- Title Banner -->
+        <mxCell id="title" value="&lt;b style=&quot;font-size: 18px; color: #0F172A;&quot;&gt;FLOWCHART SISTEM IOT QUALITY CONTROL &amp;amp; WEB DASHBOARD&lt;/b&gt;&lt;br&gt;&lt;span style=&quot;font-size: 12px; color: #64748B;&quot;&gt;Alur Kerja Deteksi Cacat Barang, Klasifikasi Sensor ESP32, Transmisi REST API, dan Visualisasi Real-Time&lt;/span&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#CBD5E1;strokeWidth=1.5;shadow=1;align=center;" vertex="1" parent="1">
+          <mxGeometry x="250" y="30" width="700" height="70" as="geometry" />
+        </mxCell>
+
+        <!-- 1. START -->
+        <mxCell id="node_start" value="&lt;b style=&quot;font-size: 14px; color: #FFFFFF;&quot;&gt;MULAI (START)&lt;/b&gt;" style="rounded=1;arcSize=50;whiteSpace=wrap;html=1;fillColor=#0F172A;strokeColor=#1E293B;strokeWidth=2;shadow=1;" vertex="1" parent="1">
+          <mxGeometry x="500" y="140" width="200" height="50" as="geometry" />
+        </mxCell>
+
+        <!-- 2. INISIALISASI -->
+        <mxCell id="node_init" value="&lt;b style=&quot;color: #0F172A;&quot;&gt;Inisialisasi Sistem Hardware &amp;amp; Web:&lt;/b&gt;&lt;br&gt;1. Boot ESP32 &amp;amp; Hubungkan ke WiFi&lt;br&gt;2. Inisialisasi Pin Sensor (HC-SR04 / IR)&lt;br&gt;3. Inisialisasi Web Dashboard &amp;amp; Chart.js" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#2563EB;strokeWidth=2;shadow=1;align=left;spacingLeft=15;" vertex="1" parent="1">
+          <mxGeometry x="460" y="230" width="280" height="80" as="geometry" />
+        </mxCell>
+
+        <!-- 3. BACA SENSOR -->
+        <mxCell id="node_read_sensor" value="&lt;b style=&quot;color: #0F172A;&quot;&gt;Pembacaan Nilai Sensor:&lt;/b&gt;&lt;br&gt;Pancarkan sinyal &amp;amp; ukur pantulan / jarak objek" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EFF6FF;strokeColor=#3B82F6;strokeWidth=1.5;shadow=1;" vertex="1" parent="1">
+          <mxGeometry x="470" y="350" width="260" height="60" as="geometry" />
+        </mxCell>
+
+        <!-- 4. DECISION: OBJEK TERDETEKSI? -->
+        <mxCell id="node_dec_detect" value="&lt;b style=&quot;color: #78350F;&quot;&gt;Objek / Barang&lt;br&gt;Terdeteksi?&lt;/b&gt;" style="rhombus;whiteSpace=wrap;html=1;fillColor=#FEF3C7;strokeColor=#F59E0B;strokeWidth=2;shadow=1;" vertex="1" parent="1">
+          <mxGeometry x="500" y="450" width="200" height="100" as="geometry" />
+        </mxCell>
+
+        <!-- 5. DECISION: KONDISI NORMAL (PASS) ATAU CACAT (DEFECT)? -->
+        <mxCell id="node_dec_qc" value="&lt;b style=&quot;color: #0F172A;&quot;&gt;Apakah Nilai Sensor&lt;br&gt;Sesuai Toleransi&lt;br&gt;Standar (Normal)?&lt;/b&gt;" style="rhombus;whiteSpace=wrap;html=1;fillColor=#F1F5F9;strokeColor=#475569;strokeWidth=2;shadow=1;" vertex="1" parent="1">
+          <mxGeometry x="480" y="600" width="240" height="120" as="geometry" />
+        </mxCell>
+
+        <!-- 6A. PROSES BARANG LOLOS (PASS) -->
+        <mxCell id="node_pass" value="&lt;b style=&quot;color: #065F46; font-size: 13px;&quot;&gt;STATUS: LOLOS (PASS)&lt;/b&gt;&lt;br&gt;• LED Hijau Aktif&lt;br&gt;• Buzzer Beep Pendek (1x)&lt;br&gt;• Barang Lolos ke Jalur Kemas&lt;br&gt;• Set Action = &quot;Lolos ke Packaging&quot;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ECFDF5;strokeColor=#10B981;strokeWidth=2;shadow=1;align=left;spacingLeft=15;" vertex="1" parent="1">
+          <mxGeometry x="240" y="760" width="250" height="90" as="geometry" />
+        </mxCell>
+
+        <!-- 6B. PROSES BARANG CACAT (DEFECT) -->
+        <mxCell id="node_defect" value="&lt;b style=&quot;color: #991B1B; font-size: 13px;&quot;&gt;STATUS: CACAT (DEFECT)&lt;/b&gt;&lt;br&gt;• LED Merah Aktif&lt;br&gt;• Buzzer Alarm 2-Nada Berbunyi&lt;br&gt;• Servo Rejector Aktif Mendorong Barang&lt;br&gt;• Catat Kategori Cacat (Retak/Dimensi/dll)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FEF2F2;strokeColor=#EF4444;strokeWidth=2;shadow=1;align=left;spacingLeft=15;" vertex="1" parent="1">
+          <mxGeometry x="710" y="760" width="260" height="90" as="geometry" />
+        </mxCell>
+
+        <!-- 7. KEMAS DATA JSON -->
+        <mxCell id="node_json" value="&lt;b style=&quot;color: #0F172A;&quot;&gt;Kemas Payload Telemetri (JSON):&lt;/b&gt;&lt;br&gt;&lt;code style=&quot;font-size: 11px; color: #2563EB;&quot;&gt;{ id, timestamp, irVal, status, defectType, action }&lt;/code&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#2563EB;strokeWidth=1.5;shadow=1;" vertex="1" parent="1">
+          <mxGeometry x="420" y="890" width="360" height="60" as="geometry" />
+        </mxCell>
+
+        <!-- 8. TRANSMISI DATA -->
+        <mxCell id="node_transmit" value="&lt;b style=&quot;color: #FFFFFF;&quot;&gt;Transmisi Data via WiFi HTTP REST API / WebSocket&lt;/b&gt;&lt;br&gt;&lt;span style=&quot;color: #E2E8F0; font-size: 11px;&quot;&gt;ESP32 mengirim POST ke endpoint &lt;b&gt;/api/inspection&lt;/b&gt;&lt;/span&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#2563EB;strokeColor=#1D4ED8;strokeWidth=2;shadow=1;" vertex="1" parent="1">
+          <mxGeometry x="400" y="990" width="400" height="60" as="geometry" />
+        </mxCell>
+
+        <!-- 9. PEMBARUAN DASHBOARD -->
+        <mxCell id="node_dashboard" value="&lt;b style=&quot;color: #0F172A; font-size: 13px;&quot;&gt;Pembaruan Web &amp;amp; Mobile Dashboard Real-Time:&lt;/b&gt;&lt;br&gt;1. Update Counter Metrik KPI (Total, Lolos %, Cacat %, Laju Speed)&lt;br&gt;2. Animasi Konveyor &amp;amp; Laser Sensor Sesuai Status&lt;br&gt;3. Perbarui Grafik Fluktuasi Sensor (Chart.js Line &amp;amp; Donut)&lt;br&gt;4. Tambahkan Baris Baru pada Tabel Log Riwayat &amp;amp; Pagination&lt;br&gt;5. Bunyikan Audio Notifikasi &amp;amp; Simpan ke LocalStorage" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F8FAFC;strokeColor=#0F172A;strokeWidth=2;shadow=1;align=left;spacingLeft=20;" vertex="1" parent="1">
+          <mxGeometry x="370" y="1090" width="460" height="110" as="geometry" />
+        </mxCell>
+
+        <!-- 10. DECISION: SISTEM TETAP BERJALAN? -->
+        <mxCell id="node_dec_loop" value="&lt;b style=&quot;color: #0F172A;&quot;&gt;Lanjut Inspeksi&lt;br&gt;Barang Berikutnya?&lt;/b&gt;" style="rhombus;whiteSpace=wrap;html=1;fillColor=#EFF6FF;strokeColor=#3B82F6;strokeWidth=2;shadow=1;" vertex="1" parent="1">
+          <mxGeometry x="500" y="1240" width="200" height="90" as="geometry" />
+        </mxCell>
+
+        <!-- 11. END -->
+        <mxCell id="node_end" value="&lt;b style=&quot;font-size: 14px; color: #FFFFFF;&quot;&gt;SELESAI (END)&lt;/b&gt;" style="rounded=1;arcSize=50;whiteSpace=wrap;html=1;fillColor=#0F172A;strokeColor=#1E293B;strokeWidth=2;shadow=1;" vertex="1" parent="1">
+          <mxGeometry x="500" y="1380" width="200" height="50" as="geometry" />
+        </mxCell>
+
+        <!-- CONNECTORS / ARROWS -->
+        
+        <!-- Start -> Init -->
+        <mxCell id="edge1" edge="1" parent="1" source="node_start" target="node_init">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        
+        <!-- Init -> Read Sensor -->
+        <mxCell id="edge2" edge="1" parent="1" source="node_init" target="node_read_sensor">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Read Sensor -> Objek Terdeteksi? -->
+        <mxCell id="edge3" edge="1" parent="1" source="node_read_sensor" target="node_dec_detect">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Objek Terdeteksi? -> TIDAK (Loop back to Read Sensor) -->
+        <mxCell id="edge_detect_no" edge="1" parent="1" source="node_dec_detect" target="node_read_sensor">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="790" y="500" />
+              <mxPoint x="790" y="380" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="label_detect_no" value="&lt;b style=&quot;color: #DC2626;&quot;&gt;TIDAK&lt;/b&gt;" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="edge_detect_no">
+          <mxGeometry x="-0.2" y="1" relative="1" as="geometry">
+            <mxPoint x="15" y="-10" as="offset" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- Objek Terdeteksi? -> YA -->
+        <mxCell id="edge_detect_yes" edge="1" parent="1" source="node_dec_detect" target="node_dec_qc">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="label_detect_yes" value="&lt;b style=&quot;color: #16A34A;&quot;&gt;YA&lt;/b&gt;" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="edge_detect_yes">
+          <mxGeometry x="-0.1" relative="1" as="geometry">
+            <mxPoint x="15" as="offset" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- Decision QC -> YA (Pass) -->
+        <mxCell id="edge_qc_pass" edge="1" parent="1" source="node_dec_qc" target="node_pass">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="365" y="660" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="label_qc_pass" value="&lt;b style=&quot;color: #16A34A;&quot;&gt;YA (Normal)&lt;/b&gt;" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="edge_qc_pass">
+          <mxGeometry x="-0.4" relative="1" as="geometry">
+            <mxPoint x="-20" y="-15" as="offset" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- Decision QC -> TIDAK (Defect) -->
+        <mxCell id="edge_qc_defect" edge="1" parent="1" source="node_dec_qc" target="node_defect">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="840" y="660" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="label_qc_defect" value="&lt;b style=&quot;color: #DC2626;&quot;&gt;TIDAK (Cacat)&lt;/b&gt;" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="edge_qc_defect">
+          <mxGeometry x="-0.4" relative="1" as="geometry">
+            <mxPoint x="20" y="-15" as="offset" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- Pass -> JSON -->
+        <mxCell id="edge_pass_json" edge="1" parent="1" source="node_pass" target="node_json">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="365" y="920" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- Defect -> JSON -->
+        <mxCell id="edge_defect_json" edge="1" parent="1" source="node_defect" target="node_json">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="840" y="920" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- JSON -> Transmit -->
+        <mxCell id="edge_json_tx" edge="1" parent="1" source="node_json" target="node_transmit">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Transmit -> Dashboard -->
+        <mxCell id="edge_tx_dash" edge="1" parent="1" source="node_transmit" target="node_dashboard">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Dashboard -> Loop Decision -->
+        <mxCell id="edge_dash_loop" edge="1" parent="1" source="node_dashboard" target="node_dec_loop">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Loop Decision -> YA (Back to Read Sensor) -->
+        <mxCell id="edge_loop_yes" edge="1" parent="1" source="node_dec_loop" target="node_read_sensor">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="180" y="1285" />
+              <mxPoint x="180" y="380" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="label_loop_yes" value="&lt;b style=&quot;color: #16A34A;&quot;&gt;YA (Lanjut Loop)&lt;/b&gt;" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="edge_loop_yes">
+          <mxGeometry x="-0.8" relative="1" as="geometry">
+            <mxPoint x="-20" as="offset" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- Loop Decision -> TIDAK (End) -->
+        <mxCell id="edge_loop_no" edge="1" parent="1" source="node_dec_loop" target="node_end">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="label_loop_no" value="&lt;b style=&quot;color: #DC2626;&quot;&gt;TIDAK&lt;/b&gt;" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="edge_loop_no">
+          <mxGeometry x="-0.1" relative="1" as="geometry">
+            <mxPoint x="20" as="offset" />
+          </mxGeometry>
+        </mxCell>
+
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

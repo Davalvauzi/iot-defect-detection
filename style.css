@@ -1,0 +1,84 @@
+/* ==========================================================================
+   Clean & Aesthetic IoT Dashboard Styles
+   ========================================================================== */
+
+/* Clean Conveyor Pattern */
+.conveyor-clean {
+  background: repeating-linear-gradient(
+    90deg,
+    #e2e8f0 0px,
+    #e2e8f0 10px,
+    #cbd5e1 10px,
+    #cbd5e1 20px
+  );
+  background-size: 40px 100%;
+}
+
+.dark .conveyor-clean {
+  background: repeating-linear-gradient(
+    90deg,
+    #1e293b 0px,
+    #1e293b 10px,
+    #334155 10px,
+    #334155 20px
+  );
+  background-size: 40px 100%;
+}
+
+/* Sinar Sensor IR */
+.beam-pass {
+  background: linear-gradient(180deg, #10b981, #059669);
+  box-shadow: 0 0 14px #10b981, 0 0 24px rgba(16, 185, 129, 0.7);
+  opacity: 1 !important;
+  width: 2.5px !important;
+}
+
+.beam-defect {
+  background: linear-gradient(180deg, #f43f5e, #e11d48);
+  box-shadow: 0 0 16px #f43f5e, 0 0 28px rgba(244, 63, 94, 0.8);
+  opacity: 1 !important;
+  width: 2.5px !important;
+  animation: beamBlink 0.25s ease-in-out infinite alternate;
+}
+
+@keyframes beamBlink {
+  0% { opacity: 0.6; }
+  100% { opacity: 1; transform: scaleX(1.4); }
+}
+
+/* Alert Flash */
+.alert-flash {
+  animation: itemAlert 0.4s ease-in-out 3;
+}
+
+@keyframes itemAlert {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(244, 63, 94, 0);
+  }
+  50% {
+    box-shadow: 0 0 18px 4px rgba(244, 63, 94, 0.5);
+  }
+}
+
+/* Scrollbar Minimalis */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 9999px;
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background: #334155;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}

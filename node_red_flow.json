@@ -1,0 +1,251 @@
+[
+  {
+    "id": "tab_qc_iot",
+    "type": "tab",
+    "label": "IoT Quality Control Flow",
+    "disabled": false,
+    "info": "Flow Node-RED untuk Sistem IoT QC Deteksi Cacat Barang (Sensor + Dashboard)"
+  },
+  {
+    "id": "http_in_qc",
+    "type": "http in",
+    "z": "tab_qc_iot",
+    "name": "POST /api/inspection",
+    "url": "/api/inspection",
+    "method": "post",
+    "upload": false,
+    "swaggerDoc": "",
+    "x": 170,
+    "y": 140,
+    "wires": [
+      [
+        "function_process_qc",
+        "http_response_ok"
+      ]
+    ]
+  },
+  {
+    "id": "http_response_ok",
+    "type": "http response",
+    "z": "tab_qc_iot",
+    "name": "HTTP 200 OK",
+    "statusCode": "200",
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "x": 420,
+    "y": 100,
+    "wires": []
+  },
+  {
+    "id": "inject_pass_sample",
+    "type": "inject",
+    "z": "tab_qc_iot",
+    "name": "Simulasi Barang Lolos (PASS)",
+    "props": [
+      {
+        "p": "payload"
+      }
+    ],
+    "repeat": "",
+    "crontab": "",
+    "once": false,
+    "onceDelay": 0.1,
+    "topic": "",
+    "payload": "{\"id\":\"QC-101\",\"status\":\"PASS\",\"irVal\":140,\"defectType\":\"Normal\",\"action\":\"Lolos\"}",
+    "payloadType": "json",
+    "x": 190,
+    "y": 220,
+    "wires": [
+      [
+        "function_process_qc"
+      ]
+    ]
+  },
+  {
+    "id": "inject_defect_sample",
+    "type": "inject",
+    "z": "tab_qc_iot",
+    "name": "Simulasi Barang Cacat (DEFECT)",
+    "props": [
+      {
+        "p": "payload"
+      }
+    ],
+    "repeat": "",
+    "crontab": "",
+    "once": false,
+    "onceDelay": 0.1,
+    "topic": "",
+    "payload": "{\"id\":\"QC-102\",\"status\":\"DEFECT\",\"irVal\":850,\"defectType\":\"Goresan Permukaan\",\"action\":\"Reject\"}",
+    "payloadType": "json",
+    "x": 200,
+    "y": 280,
+    "wires": [
+      [
+        "function_process_qc"
+      ]
+    ]
+  },
+  {
+    "id": "function_process_qc",
+    "type": "function",
+    "z": "tab_qc_iot",
+    "name": "Proses Evaluasi QC & Routing",
+    "func": "let data = msg.payload;\nif (typeof data === 'string') {\n    try { data = JSON.parse(data); } catch(e) {}\n}\n\nlet total = context.get('total') || 0;\nlet pass = context.get('pass') || 0;\nlet defect = context.get('defect') || 0;\n\ntotal += 1;\nif (data.status === 'PASS') {\n    pass += 1;\n} else {\n    defect += 1;\n}\n\ncontext.set('total', total);\ncontext.set('pass', pass);\ncontext.set('defect', defect);\n\nlet msgMetric = { payload: { total: total, pass: pass, defect: defect } };\nlet msgChart = { payload: data.irVal !== undefined ? data.irVal : (data.status === 'PASS' ? 140 : 850), topic: data.id || 'Unit' };\nlet msgAlert = null;\n\nif (data.status === 'DEFECT') {\n    msgAlert = { payload: '⚠️ PERINGATAN: Barang Cacat Terdeteksi (' + (data.defectType || 'Reject') + ') pada #' + (data.id || 'N/A') };\n}\n\nreturn [msgMetric, msgChart, msgAlert, { payload: data }];",
+    "outputs": 4,
+    "timeout": "",
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 480,
+    "y": 220,
+    "wires": [
+      [
+        "ui_text_metrics",
+        "debug_log"
+      ],
+      [
+        "ui_chart_trend"
+      ],
+      [
+        "ui_notification_alert"
+      ],
+      [
+        "ui_template_table"
+      ]
+    ]
+  },
+  {
+    "id": "ui_text_metrics",
+    "type": "ui_text",
+    "z": "tab_qc_iot",
+    "group": "group_qc_dashboard",
+    "order": 1,
+    "width": 6,
+    "height": 2,
+    "name": "Metrik KPI",
+    "label": "Ringkasan Hasil Inspeksi",
+    "format": "Total: {{msg.payload.total}} | Lolos: {{msg.payload.pass}} | Cacat: {{msg.payload.defect}}",
+    "layout": "row-spread",
+    "className": "",
+    "x": 750,
+    "y": 140,
+    "wires": []
+  },
+  {
+    "id": "ui_chart_trend",
+    "type": "ui_chart",
+    "z": "tab_qc_iot",
+    "group": "group_qc_dashboard",
+    "order": 2,
+    "width": 6,
+    "height": 5,
+    "name": "Grafik Nilai Sensor (ADC)",
+    "label": "Tren Pembacaan Sensor Real-Time",
+    "chartType": "line",
+    "legend": "false",
+    "xformat": "HH:mm:ss",
+    "interpolate": "linear",
+    "nodata": "Menunggu Data...",
+    "dot": true,
+    "ymin": "0",
+    "ymax": "1024",
+    "removeOlder": "10",
+    "removeOlderPoints": "",
+    "removeOlderUnit": "60",
+    "cutout": 0,
+    "useOneColor": false,
+    "useUTC": false,
+    "colors": [
+      "#2563eb",
+      "#10b981",
+      "#ef4444"
+    ],
+    "outputs": 1,
+    "useDifferentColor": false,
+    "className": "",
+    "x": 790,
+    "y": 200,
+    "wires": [
+      []
+    ]
+  },
+  {
+    "id": "ui_notification_alert",
+    "type": "ui_toast",
+    "z": "tab_qc_iot",
+    "position": "top right",
+    "displayTime": "3",
+    "highlight": "#ef4444",
+    "sendall": true,
+    "outputs": 0,
+    "ok": "OK",
+    "cancel": "",
+    "raw": false,
+    "className": "",
+    "name": "Toast Alarm Cacat",
+    "x": 770,
+    "y": 260,
+    "wires": []
+  },
+  {
+    "id": "ui_template_table",
+    "type": "ui_template",
+    "z": "tab_qc_iot",
+    "group": "group_qc_dashboard",
+    "name": "Tabel Log Inspeksi",
+    "order": 3,
+    "width": 6,
+    "height": 4,
+    "format": "<div style='font-size:12px; font-family:sans-serif;'>\n  <b>Data Terakhir Masuk:</b>\n  <pre style='background:#f1f5f9; padding:8px; border-radius:6px;'>{{msg.payload | json}}</pre>\n</div>",
+    "storeOutMessages": true,
+    "fwdInMessages": true,
+    "resendOnRefresh": true,
+    "templateScope": "local",
+    "className": "",
+    "x": 770,
+    "y": 320,
+    "wires": [
+      []
+    ]
+  },
+  {
+    "id": "debug_log",
+    "type": "debug",
+    "z": "tab_qc_iot",
+    "name": "Debug Output",
+    "active": true,
+    "tosidebar": true,
+    "console": false,
+    "tostatus": false,
+    "complete": "payload",
+    "targetType": "msg",
+    "statusVal": "",
+    "statusType": "auto",
+    "x": 760,
+    "y": 90,
+    "wires": []
+  },
+  {
+    "id": "group_qc_dashboard",
+    "type": "ui_group",
+    "name": "IoT Quality Control Monitor",
+    "tab": "tab_ui_qc",
+    "order": 1,
+    "disp": true,
+    "width": "6",
+    "collapse": false,
+    "className": ""
+  },
+  {
+    "id": "tab_ui_qc",
+    "type": "ui_tab",
+    "name": "QC Dashboard",
+    "icon": "dashboard",
+    "order": 1,
+    "disabled": false,
+    "hidden": false
+  }
+]
