@@ -1,6 +1,5 @@
 """
-Backend Server Sederhana untuk Web Dashboard & ESP32
-Menyediakan server statis untuk index.html serta REST API untuk menerima data dari ESP32.
+Backend Server IoT QC Sederhana & Stabil (Polling Base)
 """
 
 from http.server import HTTPServer, SimpleHTTPRequestHandler
@@ -10,27 +9,44 @@ import os
 PORT = 3000
 DIRECTORY = os.path.dirname(os.path.abspath(__file__))
 
+# Menyimpan data inspeksi terakhir
+latest_data = None
+
 class IoTRequestHandler(SimpleHTTPRequestHandler):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, directory=DIRECTORY, **kwargs)
 
+    def do_GET(self):
+        global latest_data
+        # Endpoint untuk browser mengambil data terbaru
+        if self.path == '/api/latest':
+            self.send_response(200)
+            self.send_header('Content-Type', 'application/json')
+            self.send_header('Access-Control-Allow-Origin', '*')
+            self.end_headers()
+            
+            response = latest_data if latest_data else {}
+            self.wfile.write(json.dumps(response).encode('utf-8'))
+            return
+
+        super().do_GET()
+
     def do_POST(self):
-        # Endpoint untuk menerima data inspeksi dari ESP32
+        global latest_data
         if self.path == '/api/inspection':
             content_length = int(self.headers.get('Content-Length', 0))
             post_data = self.rfile.read(content_length)
-            
-            try:
-                data = json.loads(post_data.decode('utf-8'))
-                print("\n[ESP32 DATA RECEIVED]")
-                print(json.dumps(data, indent=2))
 
-                # Kirim response 200 OK
+            try:
+                latest_data = json.loads(post_data.decode('utf-8'))
+                print("\n[ESP32 DATA RECEIVED]")
+                print(json.dumps(latest_data, indent=2))
+
                 self.send_response(200)
                 self.send_header('Content-Type', 'application/json')
                 self.send_header('Access-Control-Allow-Origin', '*')
                 self.end_headers()
-                response = {"status": "success", "message": "Data berhasil diterima"}
+                response = {"status": "success"}
                 self.wfile.write(json.dumps(response).encode('utf-8'))
             except Exception as e:
                 self.send_response(400)
@@ -41,7 +57,6 @@ class IoTRequestHandler(SimpleHTTPRequestHandler):
             self.end_headers()
 
     def do_OPTIONS(self):
-        # Handle CORS preflight request
         self.send_response(200)
         self.send_header('Access-Control-Allow-Origin', '*')
         self.send_header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
@@ -52,8 +67,7 @@ def run():
     server_address = ('', PORT)
     httpd = HTTPServer(server_address, IoTRequestHandler)
     print("=" * 55)
-    print(f" IoT QC Dashboard Server Berjalan di: http://localhost:{PORT}")
-    print(f" Buka link di browser: http://localhost:{PORT}/index.html")
+    print(f" Server Aktif & Stabil di: http://localhost:{PORT}")
     print("=" * 55)
     try:
         httpd.serve_forever()

@@ -18,9 +18,10 @@ def main():
     target_port = find_esp_port()
     baud_rate = 115200
     backend_url = "http://localhost:3000/api/inspection"
+    nodered_url = "http://localhost:1880/api/inspection" # URL Node-RED
 
     print("=======================================================")
-    print("   BRIDGE SERIAL USB ESP32 -> WEB DASHBOARD IOT QC   ")
+    print("   BRIDGE SERIAL USB ESP32 -> WEB DASHBOARD & NODE-RED ")
     print("=======================================================")
     print(f"Membuka Serial Port: {target_port} pada {baud_rate} baud...")
 
@@ -39,17 +40,29 @@ def main():
                         data = json.loads(line)
                         print(f"📦 [ESP32 DATA]: ID={data.get('id')} | Status={data.get('status')} | Jarak={data.get('distance')}cm | {data.get('defectType')}")
 
-                        # Forward to Web Dashboard
-                        req = urllib.request.Request(
+                        # 1. Forward to Web Dashboard
+                        req_web = urllib.request.Request(
                             backend_url,
                             data=line.encode('utf-8'),
                             headers={'Content-Type': 'application/json'}
                         )
                         try:
-                            with urllib.request.urlopen(req, timeout=2) as resp:
+                            with urllib.request.urlopen(req_web, timeout=2) as resp:
                                 print(f"   ↳ Terkirim ke Web Dashboard: HTTP {resp.getcode()}")
                         except Exception as e:
                             print(f"   ↳ Gagal kirim ke backend (pastikan server.py aktif): {e}")
+
+                        # 2. Forward to Node-RED
+                        req_nr = urllib.request.Request(
+                            nodered_url,
+                            data=line.encode('utf-8'),
+                            headers={'Content-Type': 'application/json'}
+                        )
+                        try:
+                            with urllib.request.urlopen(req_nr, timeout=2) as resp:
+                                print(f"   ↳ Terkirim ke Node-RED: HTTP {resp.getcode()}")
+                        except Exception as e:
+                            print(f"   ↳ Gagal kirim ke Node-RED: {e}")
 
                     except json.JSONDecodeError:
                         print(f"[SERIAL]: {line}")

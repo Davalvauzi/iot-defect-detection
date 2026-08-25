@@ -679,5 +679,20 @@
   </footer>
 
   <script src="app.js"></script>
+  <script>
+      let lastId = "";
+      setInterval(async () => {
+        try {
+          const res = await fetch('/api/latest');
+          const data = await res.json();
+          if (data && data.id && data.id !== lastId) {
+            lastId = data.id;
+            if (typeof window.onESP32DataReceived === 'function') {
+              window.onESP32DataReceived(data);
+            }
+          }
+        } catch(e) {}
+      }, 500);
+    </script>
 </body>
 </html>
