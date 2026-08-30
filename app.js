@@ -228,7 +228,10 @@ document.addEventListener('DOMContentLoaded', () => {
   const simSpeedVal = document.getElementById('sim-speed-val');
   const simDefectRange = document.getElementById('sim-defect-range');
   const simDefectVal = document.getElementById('sim-defect-val');
-  const btnExportCsv = document.getElementById('btn-export-csv');
+  const btnToggleSimPanel = document.getElementById('btn-toggle-sim-panel');
+  const btnCloseSimPanel = document.getElementById('btn-close-sim-panel');
+  const simPanelSection = document.getElementById('sim-panel-section');
+  const simToggleHeaderIcon = document.getElementById('sim-toggle-header-icon');
 
   const btnOpenCustomModal = document.getElementById('btn-open-custom-modal');
   const customInputModal = document.getElementById('custom-input-modal');
@@ -269,7 +272,19 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // --- THRESHOLD CALIBRATION CONTROLS ---
+  // --- THRESHOLD CALIBRATION CONTROLS & SERVER SYNC ---
+  async function syncCalibrationToServer(minVal, maxVal) {
+    try {
+      await fetch('/api/calibration', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ minOk: minVal, maxOk: maxVal })
+      });
+    } catch(e) {
+      // Offline / standalone mode
+    }
+  }
+
   function updateThresholdUI() {
     const minOk = state.minOk !== undefined ? state.minOk : 4.0;
     const maxOk = state.maxOk !== undefined ? state.maxOk : 7.0;
@@ -288,6 +303,7 @@ document.addEventListener('DOMContentLoaded', () => {
     state.maxOk = maxVal;
     saveState();
     updateThresholdUI();
+    syncCalibrationToServer(minVal, maxVal);
     showToast(`Batas Mutu Diperbarui: ${minVal.toFixed(1)} cm – ${maxVal.toFixed(1)} cm (OK)`, 'info');
   }
 
@@ -298,6 +314,7 @@ document.addEventListener('DOMContentLoaded', () => {
         state.minOk = val;
         saveState();
         updateThresholdUI();
+        syncCalibrationToServer(state.minOk, state.maxOk || 7.0);
       }
     });
   }
@@ -309,6 +326,7 @@ document.addEventListener('DOMContentLoaded', () => {
         state.maxOk = val;
         saveState();
         updateThresholdUI();
+        syncCalibrationToServer(state.minOk || 4.0, state.maxOk);
       }
     });
   }
@@ -821,6 +839,40 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  // --- TOGGLE / OPEN-CLOSE SIMULATION PANEL ---
+  function toggleSimPanel(forceOpen) {
+    if (!simPanelSection) return;
+    const isHidden = simPanelSection.classList.contains('hidden');
+    const shouldOpen = forceOpen !== undefined ? forceOpen : isHidden;
+
+    if (shouldOpen) {
+      simPanelSection.classList.remove('hidden');
+      if (btnToggleSimPanel) {
+        btnToggleSimPanel.classList.add('bg-blue-50', 'border-blue-300', 'text-blue-700', 'dark:bg-blue-950/60', 'dark:border-blue-800', 'dark:text-blue-300');
+      }
+      if (simToggleHeaderIcon) {
+        simToggleHeaderIcon.classList.add('rotate-180');
+      }
+      simPanelSection.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    } else {
+      simPanelSection.classList.add('hidden');
+      if (btnToggleSimPanel) {
+        btnToggleSimPanel.classList.remove('bg-blue-50', 'border-blue-300', 'text-blue-700', 'dark:bg-blue-950/60', 'dark:border-blue-800', 'dark:text-blue-300');
+      }
+      if (simToggleHeaderIcon) {
+        simToggleHeaderIcon.classList.remove('rotate-180');
+      }
+    }
+    safeRenderIcons();
+  }
+
+  if (btnToggleSimPanel) {
+    btnToggleSimPanel.addEventListener('click', () => toggleSimPanel());
+  }
+  if (btnCloseSimPanel) {
+    btnCloseSimPanel.addEventListener('click', () => toggleSimPanel(false));
+  }
+
   // --- AUTO SIMULATION ---
   let autoSimInterval = null;
   let isAutoSimActive = false;
@@ -1027,42 +1079,6 @@ document.addEventListener('DOMContentLoaded', () => {
         playResetBeep();
         showToast('✓ Tabel riwayat log telah dikosongkan.', 'warn');
       }
-    });
-  }
-
-  // --- EXPORT TO CSV ---
-  if (btnExportCsv) {
-    btnExportCsv.addEventListener('click', () => {
-      if (!state.logs || state.logs.length === 0) {
-        showToast('Tidak ada data untuk diekspor!', 'warn');
-        return;
-      }
-
-      let csvContent = 'data:text/csv;charset=utf-8,';
-      csvContent += 'No,ID Barang,Waktu,Jarak Sensor (cm),Hasil Status,Keterangan Cacat,Aksi Perangkat\n';
-
-      state.logs.forEach((log, index) => {
-        const distVal = log.distance !== undefined ? log.distance : (log.irVal ? (log.irVal / 25).toFixed(1) : '5.2');
-        const row = [
-          index + 1,
-          `"${log.id || ''}"`,
-          `"${log.timestamp || ''}"`,
-          distVal,
-          `"${log.status || ''}"`,
-          `"${log.defectType || ''}"`,
-          `"${log.action || ''}"`
-        ].join(',');
-        csvContent += row + '\n';
-      });
-
-      const encodedUri = encodeURI(csvContent);
-      const link = document.createElement('a');
-      link.setAttribute('href', encodedUri);
-      link.setAttribute('download', `Data_Inspeksi_HCSR04_${new Date().toISOString().slice(0, 10)}.csv`);
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      showToast('✓ Laporan CSV berhasil diunduh!', 'success');
     });
   }
 
@@ -1284,5 +1300,6 @@ document.addEventListener('DOMContentLoaded', () => {
   // Initial Startup
   initCharts();
   updateThresholdUI();
+  syncCalibrationToServer(state.minOk !== undefined ? state.minOk : 4.0, state.maxOk !== undefined ? state.maxOk : 7.0);
   updateMetricsUI();
 });

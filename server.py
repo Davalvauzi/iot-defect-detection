@@ -9,15 +9,16 @@ import os
 PORT = 3000
 DIRECTORY = os.path.dirname(os.path.abspath(__file__))
 
-# Menyimpan data inspeksi terakhir
+# Menyimpan data inspeksi terakhir & konfigurasi kalibrasi mutu
 latest_data = None
+current_calibration = {"minOk": 4.0, "maxOk": 7.0}
 
 class IoTRequestHandler(SimpleHTTPRequestHandler):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, directory=DIRECTORY, **kwargs)
 
     def do_GET(self):
-        global latest_data
+        global latest_data, current_calibration
         # Endpoint untuk browser mengambil data terbaru
         if self.path == '/api/latest':
             self.send_response(200)
@@ -29,10 +30,40 @@ class IoTRequestHandler(SimpleHTTPRequestHandler):
             self.wfile.write(json.dumps(response).encode('utf-8'))
             return
 
+        # Endpoint untuk sinkronisasi kalibrasi dari web ke Virtual ESP32
+        if self.path == '/api/calibration':
+            self.send_response(200)
+            self.send_header('Content-Type', 'application/json')
+            self.send_header('Access-Control-Allow-Origin', '*')
+            self.end_headers()
+            self.wfile.write(json.dumps(current_calibration).encode('utf-8'))
+            return
+
         super().do_GET()
 
     def do_POST(self):
-        global latest_data
+        global latest_data, current_calibration
+        if self.path == '/api/calibration':
+            content_length = int(self.headers.get('Content-Length', 0))
+            post_data = self.rfile.read(content_length)
+            try:
+                data = json.loads(post_data.decode('utf-8'))
+                if "minOk" in data and "maxOk" in data:
+                    current_calibration["minOk"] = float(data["minOk"])
+                    current_calibration["maxOk"] = float(data["maxOk"])
+                    print(f"\n[CALIBRATION SYNC] Batas Mutu Diperbarui: {current_calibration['minOk']} cm - {current_calibration['maxOk']} cm")
+                
+                self.send_response(200)
+                self.send_header('Content-Type', 'application/json')
+                self.send_header('Access-Control-Allow-Origin', '*')
+                self.end_headers()
+                self.wfile.write(json.dumps({"status": "success", "calibration": current_calibration}).encode('utf-8'))
+            except Exception as e:
+                self.send_response(400)
+                self.end_headers()
+                self.wfile.write(f'{{"status":"error","message":"{str(e)}"}}'.encode('utf-8'))
+            return
+
         if self.path == '/api/inspection':
             content_length = int(self.headers.get('Content-Length', 0))
             post_data = self.rfile.read(content_length)
