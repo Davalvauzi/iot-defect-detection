@@ -731,6 +731,10 @@ document.addEventListener('DOMContentLoaded', () => {
       playDefectAlarm();
     }
 
+    if (typeof forwardToThingsBoard === 'function') {
+      forwardToThingsBoard(itemData);
+    }
+
     updateMetricsUI();
   }
 
@@ -1294,6 +1298,88 @@ document.addEventListener('DOMContentLoaded', () => {
       }
       closeFirebaseModal();
       showToast('Mode Standalone (Lokal) Aktif.', 'info');
+    });
+  }
+
+  // --- THINGSBOARD IOT PLATFORM INTEGRATION ---
+  let isTbActive = false;
+  let tbHost = 'https://thingsboard.cloud';
+  let tbToken = '';
+
+  const btnOpenTbModal = document.getElementById('btn-open-tb-modal');
+  const tbConfigModal = document.getElementById('tb-config-modal');
+  const btnCloseTbModal = document.getElementById('btn-close-tb-modal');
+  const btnCancelTbModal = document.getElementById('btn-cancel-tb-modal');
+  const btnTbActivate = document.getElementById('btn-tb-activate');
+  const btnTbDeactivate = document.getElementById('btn-tb-deactivate');
+  const tbStatusText = document.getElementById('tb-status-text');
+  const tbHostUrlInput = document.getElementById('tb-host-url');
+  const tbAccessTokenInput = document.getElementById('tb-access-token');
+
+  function openTbModal() {
+    if (tbConfigModal) tbConfigModal.classList.remove('hidden');
+  }
+
+  function closeTbModal() {
+    if (tbConfigModal) tbConfigModal.classList.add('hidden');
+  }
+
+  if (btnOpenTbModal) btnOpenTbModal.addEventListener('click', openTbModal);
+  if (btnCloseTbModal) btnCloseTbModal.addEventListener('click', closeTbModal);
+  if (btnCancelTbModal) btnCancelTbModal.addEventListener('click', closeTbModal);
+
+  async function forwardToThingsBoard(itemData) {
+    if (!isTbActive || !tbToken) return;
+    try {
+      const endpoint = `${tbHost.replace(/\/$/, '')}/api/v1/${tbToken}/telemetry`;
+      const payload = {
+        itemId: itemData.id,
+        distance: itemData.distance !== undefined ? itemData.distance : 5.2,
+        status: itemData.status,
+        defectType: itemData.defectType,
+        totalInspected: state.total || 0,
+        passCount: state.pass || 0,
+        defectCount: state.defect || 0
+      };
+
+      fetch(endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      }).catch(err => console.warn('ThingsBoard stream error:', err));
+    } catch (e) {
+      console.warn('ThingsBoard forward error:', e);
+    }
+  }
+
+  if (btnTbActivate) {
+    btnTbActivate.addEventListener('click', () => {
+      tbHost = (tbHostUrlInput && tbHostUrlInput.value.trim()) || 'https://thingsboard.cloud';
+      tbToken = (tbAccessTokenInput && tbAccessTokenInput.value.trim()) || 'DEMO_DEVICE_TOKEN';
+      isTbActive = true;
+
+      if (tbStatusText) {
+        tbStatusText.textContent = 'ThingsBoard: Active';
+        if (btnOpenTbModal) {
+          btnOpenTbModal.className = 'flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-sky-100 dark:bg-sky-950/60 border border-sky-300 dark:border-sky-700 text-sky-800 dark:text-sky-300 text-xs font-semibold';
+        }
+      }
+      closeTbModal();
+      showToast('🌐 ThingsBoard Telemetry Stream Aktif!', 'success');
+    });
+  }
+
+  if (btnTbDeactivate) {
+    btnTbDeactivate.addEventListener('click', () => {
+      isTbActive = false;
+      if (tbStatusText) {
+        tbStatusText.textContent = 'ThingsBoard: Standalone';
+        if (btnOpenTbModal) {
+          btnOpenTbModal.className = 'flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-sky-50 hover:bg-sky-100 dark:bg-sky-950/40 border border-sky-200 dark:border-sky-800/60 text-sky-700 dark:text-sky-300 text-xs font-semibold';
+        }
+      }
+      closeTbModal();
+      showToast('ThingsBoard dinonaktifkan (Mode Standalone).', 'info');
     });
   }
 

@@ -1,0 +1,102 @@
+{
+  "title": "Smart QC IoT Quality Control Dashboard",
+  "image": null,
+  "mobileHide": false,
+  "mobileOrder": null,
+  "configuration": {
+    "description": "Dashboard Monitoring Real-Time Sistem Inspeksi & Quality Control IoT (ESP32 + Sensor Ultrasonik HC-SR04)",
+    "widgets": {
+      "widget_distance_chart": {
+        "isFullWidth": false,
+        "type": "timeseries",
+        "sizeX": 16,
+        "sizeY": 8,
+        "row": 0,
+        "col": 0,
+        "config": {
+          "title": "Tren Pengukuran Jarak & Ketinggian Sensor (cm)",
+          "datasources": [
+            {
+              "type": "entity",
+              "dataKeys": [
+                {
+                  "name": "distance",
+                  "type": "timeseries",
+                  "label": "Jarak Objek (cm)",
+                  "color": "#2563eb",
+                  "settings": {
+                    "showLines": true,
+                    "fillLines": true,
+                    "showPoints": true
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "widget_kpi_cards": {
+        "isFullWidth": false,
+        "type": "latest",
+        "sizeX": 8,
+        "sizeY": 4,
+        "row": 0,
+        "col": 16,
+        "config": {
+          "title": "Ringkasan Mutu Barang",
+          "datasources": [
+            {
+              "type": "entity",
+              "dataKeys": [
+                { "name": "totalInspected", "type": "timeseries", "label": "Total Diperiksa", "color": "#0284c7" },
+                { "name": "passCount", "type": "timeseries", "label": "Lolos (OK)", "color": "#16a34a" },
+                { "name": "defectCount", "type": "timeseries", "label": "Cacat (Reject)", "color": "#dc2626" }
+              ]
+            }
+          ]
+        }
+      },
+      "widget_status_card": {
+        "isFullWidth": false,
+        "type": "latest",
+        "sizeX": 8,
+        "sizeY": 4,
+        "row": 4,
+        "col": 16,
+        "config": {
+          "title": "Status Inspeksi Terkini",
+          "datasources": [
+            {
+              "type": "entity",
+              "dataKeys": [
+                { "name": "itemId", "type": "timeseries", "label": "ID Barang" },
+                { "name": "status", "type": "timeseries", "label": "Hasil Mutu" },
+                { "name": "defectType", "type": "timeseries", "label": "Keterangan Dimensi" }
+              ]
+            }
+          ]
+        }
+      }
+    },
+    "states": {
+      "default": {
+        "name": "Quality Control Overview",
+        "root": true,
+        "layouts": {
+          "main": {
+            "widgets": {
+              "widget_distance_chart": { "sizeX": 16, "sizeY": 8, "row": 0, "col": 0 },
+              "widget_kpi_cards": { "sizeX": 8, "sizeY": 4, "row": 0, "col": 16 },
+              "widget_status_card": { "sizeX": 8, "sizeY": 4, "row": 4, "col": 16 }
+            },
+            "gridSettings": {
+              "columns": 24,
+              "color": "rgba(0, 0, 0, 0.05)",
+              "backgroundColor": "#f8fafc"
+            }
+          }
+        }
+      }
+    }
+  }
+}

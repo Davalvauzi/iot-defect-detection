@@ -82,6 +82,12 @@
           <span id="firebase-status-text">Firebase: Standalone</span>
         </button>
 
+        <!-- ThingsBoard Status Button / Indicator -->
+        <button id="btn-open-tb-modal" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-sky-50 hover:bg-sky-100 dark:bg-sky-950/40 dark:hover:bg-sky-900/60 border border-sky-200 dark:border-sky-800/60 text-sky-700 dark:text-sky-300 text-xs font-semibold transition active:scale-95">
+          <i data-lucide="globe" class="w-3.5 h-3.5 text-sky-600"></i>
+          <span id="tb-status-text">ThingsBoard: Standalone</span>
+        </button>
+
         <!-- Tombol Buka Panel Simulasi di Header -->
         <button id="btn-toggle-sim-panel" title="Buka / Tutup Panel Kontrol Simulasi" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 text-xs font-semibold transition active:scale-95 cursor-pointer">
           <i data-lucide="sliders" class="w-3.5 h-3.5 text-blue-600 dark:text-blue-400"></i>
@@ -625,6 +631,8 @@
           </div>
         </button>
       </div>
+    </div>
+  </div>
 
   <!-- MODAL 3: FIREBASE CLOUD CONFIGURATION -->
   <div id="firebase-config-modal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
@@ -678,6 +686,58 @@
     </div>
   </div>
 
+  <!-- MODAL 4: THINGSBOARD IOT PLATFORM CONFIGURATION -->
+  <div id="tb-config-modal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4">
+      <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
+        <div class="flex items-center gap-2.5">
+          <div class="w-8 h-8 rounded-lg bg-sky-100 dark:bg-sky-950/60 text-sky-600 dark:text-sky-400 flex items-center justify-center">
+            <i data-lucide="globe" class="w-4 h-4"></i>
+          </div>
+          <div>
+            <h3 class="font-bold text-slate-900 dark:text-white text-base">ThingsBoard IoT Platform</h3>
+            <p class="text-[11px] text-slate-400">Integrasi Telemetri HTTP/MQTT ThingsBoard</p>
+          </div>
+        </div>
+        <button id="btn-close-tb-modal" class="text-slate-400 hover:text-slate-700 dark:hover:text-white p-1 rounded-lg">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <div class="space-y-3 text-xs">
+        <div class="p-3 rounded-xl bg-sky-50/60 dark:bg-sky-950/20 border border-sky-200 dark:border-sky-900/40 text-sky-900 dark:text-sky-200">
+          <span class="font-bold block mb-1">ThingsBoard Telemetry Stream:</span>
+          <p class="text-[11px] leading-relaxed text-slate-600 dark:text-slate-300">
+            Setiap data inspeksi (jarak, status, jumlah lolos/cacat) otomatis dikirimkan ke server ThingsBoard via REST Telemetry API untuk divisualisasikan pada widget ThingsBoard.
+          </p>
+        </div>
+
+        <div>
+          <label class="block text-slate-700 dark:text-slate-300 font-semibold mb-1">ThingsBoard Server Host:</label>
+          <input type="text" id="tb-host-url" value="https://thingsboard.cloud" placeholder="https://thingsboard.cloud" class="w-full px-3 py-2 rounded-lg bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-200 font-mono text-[11px] focus:outline-none focus:border-blue-600">
+        </div>
+
+        <div>
+          <label class="block text-slate-700 dark:text-slate-300 font-semibold mb-1">Device Access Token:</label>
+          <input type="text" id="tb-access-token" placeholder="Contoh: ESP32_QC_DEMO_TOKEN" class="w-full px-3 py-2 rounded-lg bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-200 font-mono text-[11px] focus:outline-none focus:border-blue-600">
+        </div>
+
+        <div class="pt-2 flex items-center justify-between">
+          <button id="btn-tb-activate" class="px-3 py-1.5 rounded-lg bg-sky-100 hover:bg-sky-200 dark:bg-sky-950/60 dark:hover:bg-sky-900/80 text-sky-800 dark:text-sky-300 font-semibold text-xs">
+            Aktifkan Stream ThingsBoard
+          </button>
+          <button id="btn-tb-deactivate" class="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-semibold text-xs">
+            Nonaktifkan
+          </button>
+        </div>
+      </div>
+
+      <div class="flex items-center justify-end pt-3 border-t border-slate-100 dark:border-slate-800">
+        <button id="btn-cancel-tb-modal" class="px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold">Simpan & Tutup</button>
+      </div>
+    </div>
+  </div>
+
   <!-- TOAST NOTIFICATION -->
   <div id="toast-notification" class="fixed bottom-6 right-6 z-50 flex items-center gap-2.5 px-4 py-3 rounded-xl bg-slate-900 text-white shadow-xl border border-slate-700 text-xs font-semibold transform translate-y-20 opacity-0 pointer-events-none transition-all duration-300">
     <i id="toast-icon" data-lucide="check-circle" class="w-4 h-4 text-emerald-400"></i>
@@ -689,7 +749,7 @@
     Proyek IoT Deteksi Cacat Barang menggunakan Sensor Infrared &copy; 2026. Dashboard Monitoring Real-Time.
   </footer>
 
-  <script src="app.js?v=3"></script>
+  <script src="app.js?v=4"></script>
   <script>
       let lastId = "";
       setInterval(async () => {
