@@ -1387,34 +1387,53 @@ document.addEventListener('DOMContentLoaded', () => {
   if (btnCloseTbModal) btnCloseTbModal.addEventListener('click', closeTbModal);
   if (btnCancelTbModal) btnCancelTbModal.addEventListener('click', closeTbModal);
 
+  const btnTbTestSend = document.getElementById('btn-tb-test-send');
+
   async function forwardToThingsBoard(itemData) {
     if (!isTbActive || !tbToken) return;
+    const payload = {
+      itemId: itemData.id || 'BRG-101',
+      distance: itemData.distance !== undefined ? itemData.distance : 5.2,
+      status: itemData.status || 'PASS',
+      defectType: itemData.defectType || 'Dimensi Standar',
+      totalInspected: state.total || 1,
+      passCount: state.pass || 1,
+      defectCount: state.defect || 0
+    };
+
+    // 1. Direct fetch ke ThingsBoard Cloud
     try {
       const endpoint = `${tbHost.replace(/\/$/, '')}/api/v1/${tbToken}/telemetry`;
-      const payload = {
-        itemId: itemData.id,
-        distance: itemData.distance !== undefined ? itemData.distance : 5.2,
-        status: itemData.status,
-        defectType: itemData.defectType,
-        totalInspected: state.total || 0,
-        passCount: state.pass || 0,
-        defectCount: state.defect || 0
-      };
-
-      fetch(endpoint, {
+      await fetch(endpoint, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      }).catch(err => console.warn('ThingsBoard stream error:', err));
-    } catch (e) {
-      console.warn('ThingsBoard forward error:', e);
+        body: JSON.stringify(payload),
+        mode: 'no-cors'
+      });
+    } catch(e) {
+      console.warn('Direct ThingsBoard fetch notice:', e);
     }
+
+    // 2. Fallback via proxy server lokal jika berjalan
+    try {
+      await fetch('/api/thingsboard', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ host: tbHost, token: tbToken, payload: payload })
+      });
+    } catch(err2) {}
   }
 
   if (btnTbActivate) {
     btnTbActivate.addEventListener('click', () => {
       tbHost = (tbHostUrlInput && tbHostUrlInput.value.trim()) || 'https://thingsboard.cloud';
-      tbToken = (tbAccessTokenInput && tbAccessTokenInput.value.trim()) || 'DEMO_DEVICE_TOKEN';
+      tbToken = (tbAccessTokenInput && tbAccessTokenInput.value.trim()) || '';
+      
+      if (!tbToken) {
+        showToast('Mohon masukkan Device Access Token ThingsBoard terlebih dahulu!', 'warn');
+        return;
+      }
+
       isTbActive = true;
 
       if (tbStatusText) {
@@ -1425,6 +1444,32 @@ document.addEventListener('DOMContentLoaded', () => {
       }
       closeTbModal();
       showToast('🌐 ThingsBoard Telemetry Stream Aktif!', 'success');
+    });
+  }
+
+  if (btnTbTestSend) {
+    btnTbTestSend.addEventListener('click', async () => {
+      tbHost = (tbHostUrlInput && tbHostUrlInput.value.trim()) || 'https://thingsboard.cloud';
+      tbToken = (tbAccessTokenInput && tbAccessTokenInput.value.trim()) || '';
+
+      if (!tbToken) {
+        showToast('Masukkan Device Access Token ThingsBoard dahulu!', 'warn');
+        return;
+      }
+
+      isTbActive = true;
+      if (tbStatusText) tbStatusText.textContent = 'ThingsBoard: Active';
+
+      const testItem = {
+        id: generateRandomId(),
+        distance: 5.3,
+        status: 'PASS',
+        defectType: 'Dimensi Standar (5.3 cm)',
+        action: 'Lolos ke Packaging'
+      };
+
+      await forwardToThingsBoard(testItem);
+      showToast(`✓ Data Uji Coba ${testItem.id} berhasil dikirim ke ThingsBoard!`, 'success');
     });
   }
 

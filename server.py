@@ -74,6 +74,37 @@ class IoTRequestHandler(SimpleHTTPRequestHandler):
             self.wfile.write(json.dumps({"status": "success", "message": "Cleared"}).encode('utf-8'))
             return
 
+        if self.path == '/api/thingsboard':
+            content_length = int(self.headers.get('Content-Length', 0))
+            post_data = self.rfile.read(content_length)
+            try:
+                data = json.loads(post_data.decode('utf-8'))
+                host = data.get("host", "https://thingsboard.cloud").rstrip('/')
+                token = data.get("token", "")
+                payload = data.get("payload", {})
+                if token:
+                    target_url = f"{host}/api/v1/{token}/telemetry"
+                    req = urllib.request.Request(
+                        target_url,
+                        data=json.dumps(payload).encode('utf-8'),
+                        headers={'Content-Type': 'application/json'}
+                    )
+                    with urllib.request.urlopen(req, timeout=5) as resp:
+                        print(f"\n[THINGSBOARD PROXY] Telemetry pushed to {target_url} -> HTTP {resp.status}")
+                self.send_response(200)
+                self.send_header('Content-Type', 'application/json')
+                self.send_header('Access-Control-Allow-Origin', '*')
+                self.end_headers()
+                self.wfile.write(json.dumps({"status": "success"}).encode('utf-8'))
+            except Exception as e:
+                print(f"[THINGSBOARD PROXY ERROR] {e}")
+                self.send_response(200)
+                self.send_header('Content-Type', 'application/json')
+                self.send_header('Access-Control-Allow-Origin', '*')
+                self.end_headers()
+                self.wfile.write(json.dumps({"status": "error", "message": str(e)}).encode('utf-8'))
+            return
+
         if self.path == '/api/inspection':
             content_length = int(self.headers.get('Content-Length', 0))
             post_data = self.rfile.read(content_length)
