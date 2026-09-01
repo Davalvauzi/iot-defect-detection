@@ -636,8 +636,8 @@
             <i data-lucide="flame" class="w-4 h-4"></i>
           </div>
           <div>
-            <span class="font-bold text-red-800 dark:text-red-300 block text-xs">Hapus & Kosongkan Data Real (Firebase Cloud)</span>
-            <span class="text-red-600 dark:text-red-400/90 text-[11px]">Membersihkan seluruh data inspeksi di server Google Firebase Cloud kembali ke null.</span>
+            <span class="font-bold text-red-800 dark:text-red-300 block text-xs">Hapus & Kosongkan Data Real (Firebase Cloud & ThingsBoard)</span>
+            <span class="text-red-600 dark:text-red-400/90 text-[11px]">Membersihkan seluruh rekaman inspeksi di Google Firebase & mereset telemetri ThingsBoard ke 0.</span>
           </div>
         </button>
       </div>
@@ -746,6 +746,10 @@
           <button id="btn-tb-test-send" class="w-full mt-1 px-3 py-1.5 rounded-lg bg-emerald-100 hover:bg-emerald-200 dark:bg-emerald-950/60 dark:hover:bg-emerald-900/80 text-emerald-800 dark:text-emerald-300 font-bold text-xs flex items-center justify-center gap-1.5">
             <i data-lucide="send" class="w-3.5 h-3.5"></i>
             <span>Kirim 1 Data Uji Coba Telemetri ke ThingsBoard</span>
+          </button>
+          <button id="btn-tb-wipe" class="w-full px-3 py-1.5 rounded-lg bg-red-100 hover:bg-red-200 dark:bg-red-950/60 dark:hover:bg-red-900/80 text-red-700 dark:text-red-300 font-bold text-xs flex items-center justify-center gap-1.5">
+            <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+            <span>Kosongkan & Reset Telemetri ThingsBoard ke 0</span>
           </button>
         </div>
       </div>

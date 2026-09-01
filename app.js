@@ -1016,25 +1016,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   if (btnActionResetAll) {
     btnActionResetAll.addEventListener('click', () => {
-      stopAutoSimulation();
-      if (isAutoSimActive && btnAutoSim) {
-        btnAutoSim.click();
-      }
-
-      state = {
-        total: 0,
-        pass: 0,
-        defect: 0,
-        speedHistory: [],
-        logs: []
-      };
-
-      currentPage = 1;
-      saveState();
-      updateMetricsUI();
-      playResetBeep();
-      closeResetModal();
-      showToast('✓ Seluruh data berhasil di-reset!', 'success');
+      wipeRealCloudData();
     });
   }
 
@@ -1079,9 +1061,10 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // --- HAPUS & KOSONGKAN DATA REAL (FIREBASE CLOUD & SERVER) ---
+  // --- HAPUS & KOSONGKAN DATA REAL (FIREBASE CLOUD, THINGSBOARD & SERVER) ---
   const btnActionWipeCloud = document.getElementById('btn-action-wipe-cloud');
   const btnFirebaseWipe = document.getElementById('btn-firebase-wipe');
+  const btnTbWipe = document.getElementById('btn-tb-wipe');
 
   async function wipeRealCloudData() {
     initAudio();
@@ -1107,12 +1090,28 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     }
 
-    // 3. Reset Server Backend Lokal jika berjalan
+    // 3. Reset & Zero-out ThingsBoard Telemetry Cloud
+    const curTbToken = tbToken || (tbAccessTokenInput && tbAccessTokenInput.value.trim()) || '';
+    if (curTbToken) {
+      try {
+        const tbResetItem = {
+          id: '-',
+          distance: 0.0,
+          status: 'STANDBY',
+          defectType: 'Sistem Direset Bersih (0)'
+        };
+        await forwardToThingsBoard(tbResetItem);
+      } catch(e) {
+        console.warn('ThingsBoard wipe warning:', e);
+      }
+    }
+
+    // 4. Reset Server Backend Lokal jika berjalan
     try {
       await fetch('/api/reset', { method: 'POST' });
     } catch(e){}
 
-    // 4. Reset Seluruh State di Web Dashboard
+    // 5. Reset Seluruh State di Web Dashboard
     state.total = 0;
     state.pass = 0;
     state.defect = 0;
@@ -1124,12 +1123,14 @@ document.addEventListener('DOMContentLoaded', () => {
     playResetBeep();
     closeResetModal();
     closeFirebaseModal();
+    if (typeof closeTbModal === 'function') closeTbModal();
 
-    showToast('🔥 Seluruh Data Real di Google Firebase Cloud Berhasil Dikosongkan!', 'success');
+    showToast('🔥 Seluruh Data Real di Firebase, ThingsBoard & Web Berhasil Dikosongkan!', 'success');
   }
 
   if (btnActionWipeCloud) btnActionWipeCloud.addEventListener('click', wipeRealCloudData);
   if (btnFirebaseWipe) btnFirebaseWipe.addEventListener('click', wipeRealCloudData);
+  if (btnTbWipe) btnTbWipe.addEventListener('click', wipeRealCloudData);
 
   if (btnClearTableOnly) {
     btnClearTableOnly.addEventListener('click', () => {
