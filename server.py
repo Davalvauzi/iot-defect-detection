@@ -64,6 +64,16 @@ class IoTRequestHandler(SimpleHTTPRequestHandler):
                 self.wfile.write(f'{{"status":"error","message":"{str(e)}"}}'.encode('utf-8'))
             return
 
+        if self.path == '/api/reset':
+            latest_data = {}
+            print("\n[RESET] Server memory & latest data cleared!")
+            self.send_response(200)
+            self.send_header('Content-Type', 'application/json')
+            self.send_header('Access-Control-Allow-Origin', '*')
+            self.end_headers()
+            self.wfile.write(json.dumps({"status": "success", "message": "Cleared"}).encode('utf-8'))
+            return
+
         if self.path == '/api/inspection':
             content_length = int(self.headers.get('Content-Length', 0))
             post_data = self.rfile.read(content_length)

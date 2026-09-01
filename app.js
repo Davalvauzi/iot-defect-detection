@@ -1077,6 +1077,58 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  // --- HAPUS & KOSONGKAN DATA REAL (FIREBASE CLOUD & SERVER) ---
+  const btnActionWipeCloud = document.getElementById('btn-action-wipe-cloud');
+  const btnFirebaseWipe = document.getElementById('btn-firebase-wipe');
+
+  async function wipeRealCloudData() {
+    initAudio();
+    stopAutoSimulation();
+
+    // 1. Kosongkan Firebase Realtime DB via SDK jika terhubung
+    if (firebaseDb) {
+      try {
+        await firebaseDb.ref('inspections').remove();
+      } catch (e) {
+        console.warn('Firebase SDK wipe warning:', e);
+      }
+    }
+
+    // 2. Kosongkan Firebase Realtime DB via direct REST API fallback
+    const dbUrl = (firebaseDbUrlInput && firebaseDbUrlInput.value.trim()) || 'https://iot-defect-detection-default-rtdb.asia-southeast1.firebasedatabase.app';
+    if (dbUrl) {
+      try {
+        const cleanUrl = dbUrl.replace(/\/$/, '');
+        await fetch(`${cleanUrl}/inspections.json`, { method: 'DELETE' });
+      } catch (e) {
+        console.warn('Firebase REST wipe warning:', e);
+      }
+    }
+
+    // 3. Reset Server Backend Lokal jika berjalan
+    try {
+      await fetch('/api/reset', { method: 'POST' });
+    } catch(e){}
+
+    // 4. Reset Seluruh State di Web Dashboard
+    state.total = 0;
+    state.pass = 0;
+    state.defect = 0;
+    state.speedHistory = [];
+    state.logs = [];
+    currentPage = 1;
+    saveState();
+    updateMetricsUI();
+    playResetBeep();
+    closeResetModal();
+    closeFirebaseModal();
+
+    showToast('🔥 Seluruh Data Real di Google Firebase Cloud Berhasil Dikosongkan!', 'success');
+  }
+
+  if (btnActionWipeCloud) btnActionWipeCloud.addEventListener('click', wipeRealCloudData);
+  if (btnFirebaseWipe) btnFirebaseWipe.addEventListener('click', wipeRealCloudData);
+
   if (btnClearTableOnly) {
     btnClearTableOnly.addEventListener('click', () => {
       if (confirm('Bersihkan hanya isi tabel log riwayat? (Angka total counter akan tetap disimpan)')) {
