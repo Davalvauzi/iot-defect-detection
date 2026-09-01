@@ -164,17 +164,19 @@ document.addEventListener('DOMContentLoaded', () => {
     const distNum = parseFloat(distance);
 
     let status = 'PASS';
-    let defectType = customDefectType || `Dimensi Standar (${minOk.toFixed(1)} - ${maxOk.toFixed(1)} cm)`;
+    let defectType = `Dimensi Sesuai Standar (${minOk.toFixed(1)} - ${maxOk.toFixed(1)} cm)`;
     let action = 'Lolos ke Packaging';
 
     if (distNum < minOk) {
       status = 'DEFECT';
-      defectType = customDefectType || `Dimensi Terlalu Tebal / Tonjolan (< ${minOk.toFixed(1)} cm)`;
+      defectType = `Dimensi Terlalu Tebal / Tonjolan (< ${minOk.toFixed(1)} cm)`;
       action = 'Dorong ke Kotak Reject';
     } else if (distNum > maxOk) {
       status = 'DEFECT';
-      defectType = customDefectType || `Dimensi Penyok / Cekung (> ${maxOk.toFixed(1)} cm)`;
+      defectType = `Dimensi Penyok / Cekung (> ${maxOk.toFixed(1)} cm)`;
       action = 'Dorong ke Kotak Reject';
+    } else if (customDefectType && !customDefectType.toLowerCase().includes('cacat') && !customDefectType.toLowerCase().includes('penyok') && !customDefectType.toLowerCase().includes('tebal') && !customDefectType.toLowerCase().includes('reject')) {
+      defectType = customDefectType;
     }
 
     return { status, defectType, action };
