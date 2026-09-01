@@ -735,6 +735,10 @@ document.addEventListener('DOMContentLoaded', () => {
       forwardToThingsBoard(itemData);
     }
 
+    if (typeof pushToFirebase === 'function') {
+      pushToFirebase(itemData);
+    }
+
     updateMetricsUI();
   }
 
@@ -1235,6 +1239,24 @@ document.addEventListener('DOMContentLoaded', () => {
   if (btnCloseFirebaseModal) btnCloseFirebaseModal.addEventListener('click', closeFirebaseModal);
   if (btnCancelFirebaseModal) btnCancelFirebaseModal.addEventListener('click', closeFirebaseModal);
 
+  function pushToFirebase(itemData) {
+    if (firebaseDb && isFirebaseConnected) {
+      try {
+        firebaseDb.ref('inspections').push({
+          id: itemData.id,
+          timestamp: itemData.timestamp,
+          distance: itemData.distance !== undefined ? itemData.distance : 5.2,
+          status: itemData.status,
+          defectType: itemData.defectType,
+          action: itemData.action,
+          createdAt: Date.now()
+        });
+      } catch (e) {
+        console.warn('Firebase push error:', e);
+      }
+    }
+  }
+
   function connectFirebase(dbUrl, apiKey) {
     try {
       if (window.firebase && dbUrl) {
@@ -1245,17 +1267,8 @@ document.addEventListener('DOMContentLoaded', () => {
           });
         }
         firebaseDb = firebase.database();
-        
-        // Listen to new inspections in realtime
-        const inspectionsRef = firebaseDb.ref('inspections');
-        inspectionsRef.limitToLast(1).on('child_added', (snapshot) => {
-          const val = snapshot.val();
-          if (val && val.id) {
-            window.onESP32DataReceived(val);
-          }
-        });
-
         isFirebaseConnected = true;
+
         if (firebaseStatusText) {
           firebaseStatusText.textContent = 'Firebase: Realtime Cloud';
           if (btnOpenFirebaseModal) {
@@ -1267,24 +1280,18 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     } catch(e) {
       console.warn('Firebase connect warning:', e);
+      showToast(`Gagal konek Firebase: ${e.message || e}`, 'warn');
     }
     return false;
   }
 
   if (btnFirebaseDemoConnect) {
     btnFirebaseDemoConnect.addEventListener('click', () => {
-      const url = (firebaseDbUrlInput && firebaseDbUrlInput.value.trim()) || 'https://iot-qc-defect-default-rtdb.firebaseio.com';
+      const url = (firebaseDbUrlInput && firebaseDbUrlInput.value.trim()) || 'https://iot-defect-detection-default-rtdb.asia-southeast1.firebasedatabase.app';
       const key = (firebaseApiKeyInput && firebaseApiKeyInput.value.trim()) || '';
       
-      // Update UI
-      if (firebaseStatusText) {
-        firebaseStatusText.textContent = 'Firebase: Cloud Active';
-        if (btnOpenFirebaseModal) {
-          btnOpenFirebaseModal.className = 'flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-orange-100 dark:bg-orange-950/60 border border-orange-300 dark:border-orange-700 text-orange-800 dark:text-orange-300 text-xs font-semibold';
-        }
-      }
+      connectFirebase(url, key);
       closeFirebaseModal();
-      showToast('🔥 Mode Firebase Cloud Realtime Aktif!', 'success');
     });
   }
 
