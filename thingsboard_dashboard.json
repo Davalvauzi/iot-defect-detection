@@ -5,6 +5,19 @@
   "mobileOrder": null,
   "configuration": {
     "description": "Dashboard Monitoring Real-Time Sistem Inspeksi & Quality Control IoT (ESP32 + Sensor Ultrasonik HC-SR04)",
+    "entityAliases": {
+      "qc_device_alias": {
+        "id": "qc_device_alias",
+        "alias": "ESP32 QC Device",
+        "filter": {
+          "type": "singleEntity",
+          "singleEntity": {
+            "entityType": "DEVICE"
+          },
+          "resolveMultiple": false
+        }
+      }
+    },
     "widgets": {
       "widget_distance_chart": {
         "isFullWidth": false,
@@ -18,6 +31,7 @@
           "datasources": [
             {
               "type": "entity",
+              "entityAliasId": "qc_device_alias",
               "dataKeys": [
                 {
                   "name": "distance",
@@ -47,6 +61,7 @@
           "datasources": [
             {
               "type": "entity",
+              "entityAliasId": "qc_device_alias",
               "dataKeys": [
                 { "name": "totalInspected", "type": "timeseries", "label": "Total Diperiksa", "color": "#0284c7" },
                 { "name": "passCount", "type": "timeseries", "label": "Lolos (OK)", "color": "#16a34a" },
@@ -68,6 +83,7 @@
           "datasources": [
             {
               "type": "entity",
+              "entityAliasId": "qc_device_alias",
               "dataKeys": [
                 { "name": "itemId", "type": "timeseries", "label": "ID Barang" },
                 { "name": "status", "type": "timeseries", "label": "Hasil Mutu" },
