@@ -17,29 +17,42 @@ class IoTRequestHandler(SimpleHTTPRequestHandler):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, directory=DIRECTORY, **kwargs)
 
+    def handle(self):
+        try:
+            super().handle()
+        except (ConnectionAbortedError, ConnectionResetError, BrokenPipeError):
+            pass
+
+    def _send_json(self, data, status_code=200):
+        try:
+            body = json.dumps(data).encode('utf-8')
+            self.send_response(status_code)
+            self.send_header('Content-Type', 'application/json')
+            self.send_header('Access-Control-Allow-Origin', '*')
+            self.send_header('Content-Length', str(len(body)))
+            self.send_header('Connection', 'close')
+            self.end_headers()
+            self.wfile.write(body)
+        except (ConnectionAbortedError, ConnectionResetError, BrokenPipeError):
+            pass
+        except Exception:
+            pass
+
     def do_GET(self):
         global latest_data, current_calibration
-        # Endpoint untuk browser mengambil data terbaru
         if self.path == '/api/latest':
-            self.send_response(200)
-            self.send_header('Content-Type', 'application/json')
-            self.send_header('Access-Control-Allow-Origin', '*')
-            self.end_headers()
-            
             response = latest_data if latest_data else {}
-            self.wfile.write(json.dumps(response).encode('utf-8'))
+            self._send_json(response)
             return
 
-        # Endpoint untuk sinkronisasi kalibrasi dari web ke Virtual ESP32
         if self.path == '/api/calibration':
-            self.send_response(200)
-            self.send_header('Content-Type', 'application/json')
-            self.send_header('Access-Control-Allow-Origin', '*')
-            self.end_headers()
-            self.wfile.write(json.dumps(current_calibration).encode('utf-8'))
+            self._send_json(current_calibration)
             return
 
-        super().do_GET()
+        try:
+            super().do_GET()
+        except (ConnectionAbortedError, ConnectionResetError, BrokenPipeError):
+            pass
 
     def do_POST(self):
         global latest_data, current_calibration

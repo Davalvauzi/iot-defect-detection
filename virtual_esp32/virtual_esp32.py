@@ -63,7 +63,7 @@ class VirtualESP32:
     def fetch_calibration(self):
         """Mengambil kalibrasi ambang batas terbaru dari server/web dashboard"""
         try:
-            req = urllib.request.Request(self.cal_url, headers={'Content-Type': 'application/json'})
+            req = urllib.request.Request(self.cal_url, headers={'Content-Type': 'application/json', 'Connection': 'close'})
             with urllib.request.urlopen(req, timeout=1.5) as res:
                 if res.status == 200:
                     data = json.loads(res.read().decode('utf-8'))
@@ -84,17 +84,17 @@ class VirtualESP32:
         self.max_ok = max_val
         try:
             payload = json.dumps({"minOk": min_val, "maxOk": max_val}).encode('utf-8')
-            req = urllib.request.Request(self.cal_url, data=payload, headers={'Content-Type': 'application/json'})
+            req = urllib.request.Request(self.cal_url, data=payload, headers={'Content-Type': 'application/json', 'Connection': 'close'})
             with urllib.request.urlopen(req, timeout=1.5) as res:
                 return res.status == 200
         except Exception:
             return False
 
     def _calibration_sync_worker(self):
-        """Worker background yang otomatis mengecek perubahan slider di web setiap 1 detik"""
+        """Worker background yang otomatis mengecek perubahan slider di web secara berkala"""
         while self.sync_active:
             self.fetch_calibration()
-            time.sleep(1.0)
+            time.sleep(2.0)
 
     def evaluate_distance(self, distance_cm):
         """Mengevaluasi kualitas barang berdasarkan jarak pantulan dan standar kalibrasi aktif."""
