@@ -50,8 +50,8 @@
 <body class="bg-[#e9edf2] text-slate-800 dark:bg-slate-950 dark:text-slate-100 min-h-screen flex flex-col font-sans selection:bg-blue-600 selection:text-white transition-colors duration-200">
 
   <!-- TOP NAVBAR -->
-  <header class="bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 sticky top-0 z-50 px-4 sm:px-8 py-3.5 transition-colors">
-    <div class="max-w-6xl mx-auto flex flex-wrap items-center justify-between gap-4">
+  <header class="bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 sticky top-0 z-50 px-4 sm:px-6 py-2.5 transition-colors">
+    <div class="max-w-6xl mx-auto flex flex-wrap items-center justify-between gap-3">
       
       <!-- Logo & Title -->
       <div class="flex items-center gap-3">
@@ -124,186 +124,183 @@
   </header>
 
   <!-- MAIN CONTAINER -->
-  <main class="flex-1 max-w-6xl w-full mx-auto p-4 sm:p-6 space-y-6">
+  <main class="flex-1 max-w-6xl w-full mx-auto p-3.5 sm:p-5 space-y-4">
 
-    <!-- SIMULASI JALUR BARANG & SENSOR ULTRASONIK -->
-    <section class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800/80 rounded-2xl p-5 sm:p-6 shadow-xs">
-      <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-4">
-        <div>
-          <h2 class="text-sm sm:text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
-            <i data-lucide="activity" class="w-4 h-4 text-blue-600"></i>
-            Simulasi Jalur Inspeksi Sensor Ultrasonik HC-SR04
-          </h2>
-          <p class="text-xs text-slate-500 dark:text-slate-400">Pengukuran ketinggian dan dimensi barang menggunakan pantulan gelombang sonar</p>
-        </div>
-
-        <div class="flex items-center gap-2">
-          <span class="text-xs text-slate-500 font-medium">Status Sensor:</span>
-          <span id="ir-sensor-state" class="px-3 py-1 rounded-full text-xs font-semibold bg-slate-100 text-slate-700 border border-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700">
-            Menunggu Barang...
-          </span>
-        </div>
-      </div>
-
-      <!-- Area Animasi Konveyor & Transduser HC-SR04 -->
-      <div class="w-full bg-slate-50 dark:bg-slate-950/60 border border-slate-200 dark:border-slate-800 rounded-xl p-6 flex flex-col items-center justify-center relative min-h-[180px] overflow-hidden">
-        
-        <!-- Sensor HC-SR04 Dual Transducers (Mata Dua) -->
-        <div class="flex flex-col items-center z-10 mb-2">
-          <div class="px-4 py-1.5 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-xs flex items-center gap-3 text-xs font-semibold text-slate-700 dark:text-slate-200">
-            <div class="flex items-center gap-1">
-              <span class="w-4 h-4 rounded-full border-2 border-blue-500 bg-blue-100 dark:bg-blue-950 flex items-center justify-center text-[8px] font-bold text-blue-600">T</span>
-              <span class="w-4 h-4 rounded-full border-2 border-emerald-500 bg-emerald-100 dark:bg-emerald-950 flex items-center justify-center text-[8px] font-bold text-emerald-600">R</span>
-            </div>
-            <span>Sensor Ultrasonik (HC-SR04 • Sonar 40kHz)</span>
-          </div>
-          <!-- Pancaran Gelombang Sonar Ultrasonik -->
-          <div id="sensor-beam" class="w-8 h-12 bg-blue-400/20 dark:bg-blue-500/10 border-x border-dashed border-blue-400/50 transition-all duration-200 mt-1 rounded-b-xl opacity-60 flex items-center justify-center">
-            <span class="text-[9px] font-mono text-blue-500 dark:text-blue-400">SONAR</span>
-          </div>
-        </div>
-
-        <!-- Jalur Konveyor -->
-        <div class="w-full max-w-xl h-9 bg-slate-200 dark:bg-slate-800/90 border-y-2 border-slate-300 dark:border-slate-700 rounded-lg relative flex items-center justify-center overflow-hidden conveyor-clean">
-          <!-- Kotak Barang Animasi -->
-          <div id="virtual-item" class="absolute left-[-70px] w-12 h-8 rounded-lg bg-blue-600 border border-blue-400 flex items-center justify-center text-white font-bold text-xs shadow-sm transition-transform">
-            <i data-lucide="package" class="w-4 h-4"></i>
-          </div>
-        </div>
-
-        <!-- Teks Keterangan Hasil Scan -->
-        <div id="inspection-feedback" class="mt-3.5 text-xs font-medium text-slate-500 dark:text-slate-400 flex items-center gap-2">
-          <span class="w-2 h-2 rounded-full bg-slate-400"></span>
-          <span>Objek standar: jarak pantulan 4.0 cm – 7.0 cm (Lolos/OK)</span>
-        </div>
-      </div>
-    </section>
-
-    <!-- KARTU METRIK UTAMA -->
-    <section class="grid grid-cols-2 lg:grid-cols-4 gap-4">
-      
+    <!-- KARTU METRIK UTAMA (COMPACT) -->
+    <section class="grid grid-cols-2 lg:grid-cols-4 gap-3">
       <!-- Total Barang -->
-      <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800/80 rounded-2xl p-4 sm:p-5 shadow-xs">
-        <div class="flex items-center justify-between text-slate-500 dark:text-slate-400 mb-2">
+      <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800/80 rounded-xl p-3 sm:p-3.5 shadow-xs">
+        <div class="flex items-center justify-between text-slate-500 dark:text-slate-400 mb-1">
           <span class="text-xs font-semibold">Total Diperiksa</span>
-          <div class="w-7 h-7 rounded-lg bg-blue-50 dark:bg-blue-950/50 text-blue-600 dark:text-blue-400 flex items-center justify-center">
-            <i data-lucide="boxes" class="w-4 h-4"></i>
+          <div class="w-6 h-6 rounded-md bg-blue-50 dark:bg-blue-950/50 text-blue-600 dark:text-blue-400 flex items-center justify-center">
+            <i data-lucide="boxes" class="w-3.5 h-3.5"></i>
           </div>
         </div>
-        <div class="flex items-baseline gap-1.5">
-          <span id="metric-total" class="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white font-mono">0</span>
-          <span class="text-xs text-slate-400 font-medium">unit</span>
+        <div class="flex items-baseline justify-between">
+          <div class="flex items-baseline gap-1.5">
+            <span id="metric-total" class="text-xl sm:text-2xl font-extrabold text-slate-900 dark:text-white font-mono">0</span>
+            <span class="text-[11px] text-slate-400 font-medium">unit</span>
+          </div>
+          <span class="text-[10px] text-slate-400 font-medium">Semua data</span>
         </div>
-        <p class="mt-1.5 text-[11px] text-slate-400">Total data masuk</p>
       </div>
 
       <!-- Barang Lolos (Normal) -->
-      <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800/80 rounded-2xl p-4 sm:p-5 shadow-xs">
-        <div class="flex items-center justify-between text-slate-500 dark:text-slate-400 mb-2">
+      <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800/80 rounded-xl p-3 sm:p-3.5 shadow-xs">
+        <div class="flex items-center justify-between text-slate-500 dark:text-slate-400 mb-1">
           <span class="text-xs font-semibold">Barang Lolos (OK)</span>
-          <div class="w-7 h-7 rounded-lg bg-emerald-50 dark:bg-emerald-950/50 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
-            <i data-lucide="check-circle" class="w-4 h-4"></i>
+          <div class="w-6 h-6 rounded-md bg-emerald-50 dark:bg-emerald-950/50 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
+            <i data-lucide="check-circle" class="w-3.5 h-3.5"></i>
           </div>
         </div>
         <div class="flex items-baseline justify-between">
           <div class="flex items-baseline gap-1.5">
-            <span id="metric-pass" class="text-2xl sm:text-3xl font-extrabold text-emerald-600 dark:text-emerald-400 font-mono">0</span>
-            <span class="text-xs text-slate-400 font-medium">unit</span>
+            <span id="metric-pass" class="text-xl sm:text-2xl font-extrabold text-emerald-600 dark:text-emerald-400 font-mono">0</span>
+            <span class="text-[11px] text-slate-400 font-medium">unit</span>
           </div>
-          <span id="metric-pass-pct" class="text-xs font-bold font-mono px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300">100%</span>
+          <span id="metric-pass-pct" class="text-[11px] font-bold font-mono px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300">100%</span>
         </div>
-        <p class="mt-1.5 text-[11px] text-emerald-600 dark:text-emerald-400">Kondisi barang normal</p>
       </div>
 
       <!-- Barang Cacat (Defect) -->
-      <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800/80 rounded-2xl p-4 sm:p-5 shadow-xs">
-        <div class="flex items-center justify-between text-slate-500 dark:text-slate-400 mb-2">
+      <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800/80 rounded-xl p-3 sm:p-3.5 shadow-xs">
+        <div class="flex items-center justify-between text-slate-500 dark:text-slate-400 mb-1">
           <span class="text-xs font-semibold">Barang Cacat</span>
-          <div class="w-7 h-7 rounded-lg bg-red-50 dark:bg-red-950/50 text-red-600 dark:text-red-400 flex items-center justify-center">
-            <i data-lucide="alert-circle" class="w-4 h-4"></i>
+          <div class="w-6 h-6 rounded-md bg-red-50 dark:bg-red-950/50 text-red-600 dark:text-red-400 flex items-center justify-center">
+            <i data-lucide="alert-circle" class="w-3.5 h-3.5"></i>
           </div>
         </div>
         <div class="flex items-baseline justify-between">
           <div class="flex items-baseline gap-1.5">
-            <span id="metric-defect" class="text-2xl sm:text-3xl font-extrabold text-red-600 dark:text-red-400 font-mono">0</span>
-            <span class="text-xs text-slate-400 font-medium">unit</span>
+            <span id="metric-defect" class="text-xl sm:text-2xl font-extrabold text-red-600 dark:text-red-400 font-mono">0</span>
+            <span class="text-[11px] text-slate-400 font-medium">unit</span>
           </div>
-          <span id="metric-defect-pct" class="text-xs font-bold font-mono px-2 py-0.5 rounded-full bg-red-100 dark:bg-red-950/60 text-red-700 dark:text-red-300">0%</span>
+          <span id="metric-defect-pct" class="text-[11px] font-bold font-mono px-2 py-0.5 rounded-full bg-red-100 dark:bg-red-950/60 text-red-700 dark:text-red-300">0%</span>
         </div>
-        <p class="mt-1.5 text-[11px] text-red-600 dark:text-red-400">Perlu disortir / reject</p>
       </div>
 
       <!-- Kecepatan Deteksi -->
-      <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800/80 rounded-2xl p-4 sm:p-5 shadow-xs">
-        <div class="flex items-center justify-between text-slate-500 dark:text-slate-400 mb-2">
+      <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800/80 rounded-xl p-3 sm:p-3.5 shadow-xs">
+        <div class="flex items-center justify-between text-slate-500 dark:text-slate-400 mb-1">
           <span class="text-xs font-semibold">Laju Deteksi</span>
-          <div class="w-7 h-7 rounded-lg bg-sky-50 dark:bg-sky-950/50 text-sky-600 dark:text-sky-400 flex items-center justify-center">
-            <i data-lucide="gauge" class="w-4 h-4"></i>
+          <div class="w-6 h-6 rounded-md bg-sky-50 dark:bg-sky-950/50 text-sky-600 dark:text-sky-400 flex items-center justify-center">
+            <i data-lucide="gauge" class="w-3.5 h-3.5"></i>
           </div>
         </div>
-        <div class="flex items-baseline gap-1.5">
-          <span id="metric-speed" class="text-2xl sm:text-3xl font-extrabold text-sky-600 dark:text-sky-400 font-mono">0</span>
-          <span class="text-xs text-slate-400 font-medium">item/mnt</span>
+        <div class="flex items-baseline justify-between">
+          <div class="flex items-baseline gap-1.5">
+            <span id="metric-speed" class="text-xl sm:text-2xl font-extrabold text-sky-600 dark:text-sky-400 font-mono">0</span>
+            <span class="text-[11px] text-slate-400 font-medium">item/mnt</span>
+          </div>
+          <span class="text-[10px] text-slate-400 font-medium">Live speed</span>
         </div>
-        <p class="mt-1.5 text-[11px] text-slate-400">Kecepatan alur data</p>
       </div>
     </section>
 
-    <!-- PANEL KALIBRASI AMBANG BATAS JARAK OK / CACAT -->
-    <section class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800/80 rounded-2xl p-5 sm:p-6 shadow-xs space-y-4">
-      <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 border-b border-slate-100 dark:border-slate-800 pb-3.5">
-        <div>
+    <!-- SECTION INSPEKSI REAL-TIME & KALIBRASI AMBANG BATAS (SIDE-BY-SIDE / COMPACT) -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-3.5 items-stretch">
+      
+      <!-- KOLOM KIRI (7 Kolom): SIMULASI JALUR INSPEKSI HC-SR04 -->
+      <section class="lg:col-span-7 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800/80 rounded-xl p-3.5 sm:p-4 shadow-xs flex flex-col justify-between">
+        <div class="flex items-center justify-between gap-2 mb-2">
           <div class="flex items-center gap-2">
-            <h3 class="text-sm sm:text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
-              <i data-lucide="sliders-horizontal" class="w-4 h-4 text-blue-600"></i>
-              Kalibrasi Ambang Batas Kualitas (Batas Jarak OK / Cacat)
+            <i data-lucide="activity" class="w-4 h-4 text-blue-600 shrink-0"></i>
+            <h2 class="text-xs sm:text-sm font-bold text-slate-900 dark:text-white truncate">
+              Simulasi Jalur Sensor HC-SR04
+            </h2>
+          </div>
+          <div class="flex items-center gap-1.5 shrink-0">
+            <span class="text-[11px] text-slate-400 font-medium hidden sm:inline">Status:</span>
+            <span id="ir-sensor-state" class="px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-slate-100 text-slate-700 border border-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700">
+              Menunggu Barang...
+            </span>
+          </div>
+        </div>
+
+        <!-- Area Animasi Konveyor & Transduser HC-SR04 -->
+        <div class="w-full bg-slate-50 dark:bg-slate-950/60 border border-slate-200 dark:border-slate-800 rounded-lg p-3 flex flex-col items-center justify-center relative min-h-[125px] overflow-hidden">
+          <!-- Sensor HC-SR04 Dual Transducers -->
+          <div class="flex flex-col items-center z-10">
+            <div class="px-2.5 py-0.5 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-xs flex items-center gap-2 text-[11px] font-semibold text-slate-700 dark:text-slate-200">
+              <div class="flex items-center gap-0.5">
+                <span class="w-3.5 h-3.5 rounded-full border border-blue-500 bg-blue-100 dark:bg-blue-950 flex items-center justify-center text-[7px] font-bold text-blue-600">T</span>
+                <span class="w-3.5 h-3.5 rounded-full border border-emerald-500 bg-emerald-100 dark:bg-emerald-950 flex items-center justify-center text-[7px] font-bold text-emerald-600">R</span>
+              </div>
+              <span>HC-SR04 • Sonar 40kHz</span>
+            </div>
+            <!-- Pancaran Gelombang Sonar -->
+            <div id="sensor-beam" class="w-7 h-7 bg-blue-400/20 dark:bg-blue-500/10 border-x border-dashed border-blue-400/50 transition-all duration-200 mt-0.5 rounded-b-lg opacity-60 flex items-center justify-center">
+              <span class="text-[8px] font-mono text-blue-500 dark:text-blue-400">SONAR</span>
+            </div>
+          </div>
+
+          <!-- Jalur Konveyor -->
+          <div class="w-full max-w-md h-7 bg-slate-200 dark:bg-slate-800/90 border-y border-slate-300 dark:border-slate-700 rounded relative flex items-center justify-center overflow-hidden conveyor-clean">
+            <!-- Kotak Barang Animasi -->
+            <div id="virtual-item" class="absolute left-[-60px] w-10 h-6 rounded bg-blue-600 border border-blue-400 flex items-center justify-center text-white font-bold text-[10px] shadow-sm transition-transform">
+              <i data-lucide="package" class="w-3 h-3"></i>
+            </div>
+          </div>
+
+          <!-- Teks Keterangan Hasil Scan -->
+          <div id="inspection-feedback" class="mt-2 text-[11px] font-medium text-slate-500 dark:text-slate-400 flex items-center gap-1.5 truncate">
+            <span class="w-1.5 h-1.5 rounded-full bg-slate-400 shrink-0"></span>
+            <span class="truncate">Objek standar: jarak 4.0 cm – 7.0 cm (Lolos/OK)</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- KOLOM KANAN (5 Kolom): KALIBRASI AMBANG BATAS KUALITAS (LANGSUNG TERLIHAT) -->
+      <section class="lg:col-span-5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800/80 rounded-xl p-3.5 sm:p-4 shadow-xs flex flex-col justify-between">
+        <div class="flex items-center justify-between gap-2 mb-2">
+          <div class="flex items-center gap-1.5">
+            <i data-lucide="sliders-horizontal" class="w-4 h-4 text-emerald-600 shrink-0"></i>
+            <h3 class="text-xs sm:text-sm font-bold text-slate-900 dark:text-white truncate">
+              Kalibrasi Ambang Batas
             </h3>
-            <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800">Live Dynamic</span>
+            <span class="text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800">Live</span>
           </div>
-          <p class="text-xs text-slate-500 dark:text-slate-400">Atur batas toleransi dimensi langsung dari web tanpa perlu re-upload kodingan ESP32</p>
-        </div>
 
-        <!-- Presets -->
-        <div class="flex items-center gap-1.5 flex-wrap">
-          <span class="text-xs text-slate-400 font-medium mr-1">Preset:</span>
-          <button id="preset-small" class="px-2.5 py-1 rounded-lg text-xs font-semibold bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 transition">Kecil (3-5cm)</button>
-          <button id="preset-medium" class="px-2.5 py-1 rounded-lg text-xs font-semibold bg-blue-50 dark:bg-blue-950/60 text-blue-700 dark:text-blue-400 border border-blue-200 dark:border-blue-800 transition">Sedang (4-7cm)</button>
-          <button id="preset-large" class="px-2.5 py-1 rounded-lg text-xs font-semibold bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 transition">Besar (6-10cm)</button>
-        </div>
-      </div>
-
-      <!-- Sliders & Inputs -->
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <!-- Min OK Distance -->
-        <div class="p-3.5 bg-slate-50 dark:bg-slate-950/60 rounded-xl border border-slate-200 dark:border-slate-800">
-          <div class="flex items-center justify-between text-xs mb-1.5">
-            <span class="font-semibold text-slate-700 dark:text-slate-300">Batas Min OK:</span>
-            <span id="label-min-ok" class="font-mono font-bold text-emerald-600 dark:text-emerald-400">4.0 cm</span>
+          <!-- Presets Cepat -->
+          <div class="flex items-center gap-1 shrink-0">
+            <button id="preset-small" class="px-2 py-0.5 rounded-md text-[10px] font-semibold bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 transition">3-5cm</button>
+            <button id="preset-medium" class="px-2 py-0.5 rounded-md text-[10px] font-semibold bg-blue-50 dark:bg-blue-950/60 text-blue-700 dark:text-blue-400 border border-blue-200 dark:border-blue-800 transition">4-7cm</button>
+            <button id="preset-large" class="px-2 py-0.5 rounded-md text-[10px] font-semibold bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 transition">6-10cm</button>
           </div>
-          <input id="slider-min-ok" type="range" min="1.0" max="10.0" step="0.5" value="4.0" class="w-full accent-emerald-600 cursor-pointer">
-          <p class="text-[10px] text-slate-400 mt-1">Jika &lt; nilai ini &rarr; <span class="text-red-500 font-semibold">Cacat Tebal</span></p>
         </div>
 
-        <!-- Max OK Distance -->
-        <div class="p-3.5 bg-slate-50 dark:bg-slate-950/60 rounded-xl border border-slate-200 dark:border-slate-800">
-          <div class="flex items-center justify-between text-xs mb-1.5">
-            <span class="font-semibold text-slate-700 dark:text-slate-300">Batas Max OK:</span>
-            <span id="label-max-ok" class="font-mono font-bold text-emerald-600 dark:text-emerald-400">7.0 cm</span>
+        <!-- Sliders Min OK & Max OK -->
+        <div class="grid grid-cols-2 gap-2.5 mb-2">
+          <!-- Min OK -->
+          <div class="p-2 bg-slate-50 dark:bg-slate-950/60 rounded-lg border border-slate-200 dark:border-slate-800">
+            <div class="flex items-center justify-between text-[11px] mb-1">
+              <span class="font-semibold text-slate-700 dark:text-slate-300">Min OK:</span>
+              <span id="label-min-ok" class="font-mono font-bold text-emerald-600 dark:text-emerald-400">4.0 cm</span>
+            </div>
+            <input id="slider-min-ok" type="range" min="1.0" max="10.0" step="0.5" value="4.0" class="w-full accent-emerald-600 cursor-pointer h-1.5">
+            <p class="text-[9px] text-slate-400 mt-0.5">&lt; Min: <span class="text-red-500 font-semibold">Tebal</span></p>
           </div>
-          <input id="slider-max-ok" type="range" min="3.0" max="15.0" step="0.5" value="7.0" class="w-full accent-emerald-600 cursor-pointer">
-          <p class="text-[10px] text-slate-400 mt-1">Jika &gt; nilai ini &rarr; <span class="text-red-500 font-semibold">Cacat Penyok / Hilang</span></p>
+
+          <!-- Max OK -->
+          <div class="p-2 bg-slate-50 dark:bg-slate-950/60 rounded-lg border border-slate-200 dark:border-slate-800">
+            <div class="flex items-center justify-between text-[11px] mb-1">
+              <span class="font-semibold text-slate-700 dark:text-slate-300">Max OK:</span>
+              <span id="label-max-ok" class="font-mono font-bold text-emerald-600 dark:text-emerald-400">7.0 cm</span>
+            </div>
+            <input id="slider-max-ok" type="range" min="3.0" max="15.0" step="0.5" value="7.0" class="w-full accent-emerald-600 cursor-pointer h-1.5">
+            <p class="text-[9px] text-slate-400 mt-0.5">&gt; Max: <span class="text-red-500 font-semibold">Penyok</span></p>
+          </div>
         </div>
 
-        <!-- Range Status Info -->
-        <div class="p-3.5 bg-emerald-50/70 dark:bg-emerald-950/30 rounded-xl border border-emerald-200 dark:border-emerald-800/60 flex flex-col justify-center">
-          <span class="text-[11px] font-bold text-emerald-800 dark:text-emerald-300 mb-0.5">Zona Dimensi Standar (PASS):</span>
-          <p class="text-xs font-mono font-bold text-emerald-700 dark:text-emerald-400">
+        <!-- Zona Standar PASS Banner -->
+        <div class="p-2 px-3 bg-emerald-50/80 dark:bg-emerald-950/40 rounded-lg border border-emerald-200 dark:border-emerald-800/60 flex items-center justify-between">
+          <span class="text-[10px] font-bold text-emerald-800 dark:text-emerald-300">Zona Standar (PASS):</span>
+          <span class="text-xs font-mono font-bold text-emerald-700 dark:text-emerald-400">
             <span id="zone-min-ok">4.0 cm</span> &le; Jarak &le; <span id="zone-max-ok">7.0 cm</span>
-          </p>
-          <span class="text-[10px] text-emerald-600 dark:text-emerald-400/80 mt-1">Sensor membaca jarak dalam rentang ini dianggap <b>LOLOS (OK)</b>.</span>
+          </span>
         </div>
-      </div>
-    </section>
+      </section>
+    </div>
 
     <!-- PANEL SIMULASI & KONTROL (DIBUKA LEWAT TOMBOL DI HEADER) -->
     <section id="sim-panel-section" class="hidden bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800/80 rounded-2xl p-5 sm:p-6 shadow-sm transition-all duration-300 space-y-4">
